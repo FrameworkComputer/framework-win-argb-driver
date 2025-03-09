@@ -25,10 +25,14 @@ Environment:
     WPP_DEFINE_CONTROL_GUID(                                           \
         MyDriver1TraceGuid, (79b262e6,f592,443a,9b0a,d1bc1184ad50),                  \
                                                                        \
-        WPP_DEFINE_BIT(MYDRIVER_ALL_INFO)                              \
-        WPP_DEFINE_BIT(TRACE_DRIVER)                                   \
-        WPP_DEFINE_BIT(TRACE_DEVICE)                                   \
-        WPP_DEFINE_BIT(TRACE_QUEUE)                                    \
+        WPP_DEFINE_BIT(EntryExit)                                          \
+        WPP_DEFINE_BIT(DataFlow)                                           \
+        WPP_DEFINE_BIT(Verbose)                                            \
+        WPP_DEFINE_BIT(Information)                                        \
+        WPP_DEFINE_BIT(Warning)                                            \
+        WPP_DEFINE_BIT(Error)                                              \
+        WPP_DEFINE_BIT(Fatal)                                              \
+        WPP_DEFINE_BIT(DriverStatus)                                       \
         )                             
 
 #define WPP_FLAG_LEVEL_LOGGER(flag, level)                             \
@@ -51,6 +55,17 @@ Environment:
 // begin_wpp config
 // FUNC Trace{FLAG=MYDRIVER_ALL_INFO}(LEVEL, MSG, ...);
 // FUNC TraceEvents(LEVEL, FLAGS, MSG, ...);
+// FUNC TraceFatal{LEVEL=TRACE_LEVEL_FATAL,FLAGS=Fatal}(MSG,...);
+// FUNC TraceError{LEVEL=TRACE_LEVEL_ERROR,FLAGS=Error}(MSG,...);
+// FUNC TraceWarning{LEVEL=TRACE_LEVEL_WARNING,FLAGS=Warning}(MSG,...);
+// FUNC TraceInformation{LEVEL=TRACE_LEVEL_INFORMATION,FLAGS=Information}(MSG,...);
+// FUNC TraceVerbose{LEVEL=TRACE_LEVEL_VERBOSE,FLAGS=Verbose}(MSG,...);
+// FUNC TracePerformance{PERF=DUMMY,LEVEL=TRACE_LEVEL_PERF}(FLAGS,MSG,...);
+//
+// FUNC TraceData{LEVEL=TRACE_LEVEL_VERBOSE,FLAGS=DataFlow}(MSG,...);
+//
+// FUNC TraceDriverStatus{LEVEL=TRACE_LEVEL_INFORMATION,FLAGS=DriverStatus}(MSG,...);
+
 // end_wpp
 
 //

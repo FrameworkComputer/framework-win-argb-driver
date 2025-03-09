@@ -67,7 +67,7 @@ Return Value:
                  );
 
     if(!NT_SUCCESS(status)) {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_QUEUE, "WdfIoQueueCreate failed %!STATUS!", status);
+        TraceError("WdfIoQueueCreate failed %!STATUS!", status);
         return status;
     }
 
@@ -107,8 +107,7 @@ Return Value:
 
 --*/
 {
-    TraceEvents(TRACE_LEVEL_INFORMATION, 
-                TRACE_QUEUE, 
+    TraceInformation(
                 "%!FUNC! Queue 0x%p, Request 0x%p OutputBufferLength %d InputBufferLength %d IoControlCode %d", 
                 Queue, Request, (int) OutputBufferLength, (int) InputBufferLength, IoControlCode);
 
@@ -146,8 +145,7 @@ Return Value:
 
 --*/
 {
-    TraceEvents(TRACE_LEVEL_INFORMATION, 
-                TRACE_QUEUE, 
+    TraceInformation(
                 "%!FUNC! Queue 0x%p, Request 0x%p ActionFlags %d", 
                 Queue, Request, ActionFlags);
 

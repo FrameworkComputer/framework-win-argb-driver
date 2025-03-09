@@ -61,7 +61,7 @@ Return Value:
     WPP_INIT_TRACING( DriverObject, RegistryPath );
 #endif
 
-    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Entry");
+    TraceInformation("%!FUNC! Entry");
 
     //
     // Register a cleanup callback so that we can call WPP_CLEANUP when
@@ -82,7 +82,7 @@ Return Value:
                              );
 
     if (!NT_SUCCESS(status)) {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DRIVER, "WdfDriverCreate failed %!STATUS!", status);
+        TraceError("WdfDriverCreate failed %!STATUS!", status);
 #if UMDF_VERSION_MAJOR == 2 && UMDF_VERSION_MINOR == 0
         WPP_CLEANUP();
 #else
@@ -91,7 +91,7 @@ Return Value:
         return status;
     }
 
-    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Exit");
+    TraceInformation("%!FUNC! Exit");
 
     return status;
 }
@@ -124,11 +124,11 @@ Return Value:
 
     UNREFERENCED_PARAMETER(Driver);
 
-    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Entry");
+    TraceInformation("%!FUNC! Entry");
 
     status = FrameworkArgbCreateDevice(DeviceInit);
 
-    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Exit");
+    TraceInformation("%!FUNC! Exit");
 
     return status;
 }
@@ -154,7 +154,7 @@ Return Value:
 {
     UNREFERENCED_PARAMETER(DriverObject);
 
-    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Entry");
+    TraceInformation("%!FUNC! Entry");
 
     //
     // Stop WPP Tracing
