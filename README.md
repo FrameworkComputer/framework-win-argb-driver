@@ -19,7 +19,11 @@ Resources:
 
 Implementation steps:
 
-- Make a UMDF driver
-- Make it act as a HID device
-- Adjust HID report descriptor to Lighting and Illumination spec
-- Hook up reports to CrosEC
+- [x] Make a UMDF driver
+- [ ] Make it act as a HID device
+- [ ] Adjust HID report descriptor to Lighting and Illumination spec
+- [ ] Test with Lighting Settings
+- [ ] Hook up reports to CrosEC
+- [ ] Sign it with EV Cert
+- [ ] Run HLK tests
+- [ ] Sign it with WHQL
