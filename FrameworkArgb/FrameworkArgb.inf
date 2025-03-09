@@ -16,7 +16,7 @@ PnpLockdown = 1
 %ManufacturerName% = Standard,NT$ARCH$.10.0...22000 ; wudfrd.inf introduced in build 22000
 
 [Standard.NT$ARCH$.10.0...22000]
-%DeviceName% = MyDevice_Install, Root\FrameworkArgb ; TODO: edit hw-id
+%DeviceName% = FrameworkArgb, Root\FrameworkArgb ; TODO: edit hw-id
 
 [SourceDisksFiles]
 FrameworkArgb.dll = 1
@@ -26,20 +26,20 @@ FrameworkArgb.dll = 1
 
 ; =================== UMDF Device ==================================
 
-[MyDevice_Install.NT]
+[FrameworkArgb.NT]
 CopyFiles = UMDriverCopy
 Include = wudfrd.inf
 Needs = WUDFRD.NT
 
-[MyDevice_Install.NT.hw]
+[FrameworkArgb.NT.hw]
 Include = wudfrd.inf
 Needs = WUDFRD.NT.HW
 
-[MyDevice_Install.NT.Services]
+[FrameworkArgb.NT.Services]
 Include = wudfrd.inf
 Needs = WUDFRD.NT.Services
 
-[MyDevice_Install.NT.Wdf]
+[FrameworkArgb.NT.Wdf]
 UmdfService = FrameworkArgb,FrameworkArgb_Install
 UmdfServiceOrder = FrameworkArgb
 
