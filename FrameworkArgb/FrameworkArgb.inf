@@ -42,6 +42,10 @@ Needs = WUDFRD.NT.Services
 [FrameworkArgb.NT.Wdf]
 UmdfService = FrameworkArgb,FrameworkArgb_Install
 UmdfServiceOrder = FrameworkArgb
+UmdfKernelModeClientPolicy=AllowKernelModeClients
+UmdfFileObjectPolicy=AllowNullAndUnknownFileObjects
+UmdfMethodNeitherAction=Copy
+UmdfFsContextUsePolicy=CanUseFsContext2
 
 [FrameworkArgb_Install]
 UmdfLibraryVersion = $UMDFVERSION$

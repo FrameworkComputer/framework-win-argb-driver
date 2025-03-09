@@ -21,6 +21,8 @@ Implementation steps:
 
 - [x] Make a UMDF driver
 - [ ] Make it act as a HID device
+  - [ ] https://learn.microsoft.com/en-us/windows-hardware/drivers/wdf/creating-umdf-hid-minidrivers
+    - [x] Set INF directives
 - [ ] Adjust HID report descriptor to Lighting and Illumination spec
 - [ ] Test with Lighting Settings
 - [ ] Hook up reports to CrosEC
