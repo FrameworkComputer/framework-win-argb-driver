@@ -29,3 +29,21 @@ Implementation steps:
 - [ ] Sign it with EV Cert
 - [ ] Run HLK tests
 - [ ] Sign it with WHQL
+
+## Development
+
+Follow [Microsoft's instructions](https://learn.microsoft.com/en-us/windows-hardware/drivers/download-the-wdk)
+to install Visual Studio, Windows SDK and WDK.
+I tried to install the SDK and WDK using winget but it either failed or couldn't get detected by Visual Studio.
+
+### Build
+
+Use Visual Studio 2022 Community Edition.
+
+### Install
+
+```
+sudo pnputil /add-driver .\FrameworkArgb\x64\Debug\FrameworkArgb\FrameworkArgb.inf /install
+cp "C:\Program Files (x86)\Windows Kits\10\Tools\10.0.26100.0\x64\devcon.exe" .
+sudo .\devcon install .\FrameworkArgb\x64\Debug\FrameworkArgb\FrameworkArgb.inf root\FrameworkArgb
+```
