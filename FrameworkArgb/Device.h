@@ -15,6 +15,19 @@ Environment:
 --*/
 
 #include "public.h"
+#include <hidport.h>  // located in $(DDK_INC_PATH)/wdm
+
+
+typedef UCHAR HID_REPORT_DESCRIPTOR, * PHID_REPORT_DESCRIPTOR;
+
+
+//
+// These are the device attributes returned by the mini driver in response
+// to IOCTL_HID_GET_DEVICE_ATTRIBUTES.
+//
+#define FWK_ARGB_HID_VID        0x32AC
+#define FWK_ARGB_HID_PID        0x0033
+#define FWK_ARGB_HID_VERSION    0x0101
 
 EXTERN_C_START
 
@@ -24,7 +37,14 @@ EXTERN_C_START
 //
 typedef struct _DEVICE_CONTEXT
 {
-    ULONG PrivateDeviceData;  // just a placeholder
+    WDFDEVICE               Device;
+    WDFQUEUE                DefaultQueue;
+    WDFQUEUE                ManualQueue;
+    HID_DEVICE_ATTRIBUTES   HidDeviceAttributes;
+    BYTE                    DeviceData;
+    HID_DESCRIPTOR          HidDescriptor;
+    PHID_REPORT_DESCRIPTOR  ReportDescriptor;
+    BOOLEAN                 ReadReportDescFromRegistry;
 
 } DEVICE_CONTEXT, *PDEVICE_CONTEXT;
 
