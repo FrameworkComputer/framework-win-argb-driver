@@ -1,6 +1,19 @@
+;/*++
 ;
-; FrameworkArgb.inf
+;Copyright (c) Framework Computer Inc
 ;
+;Module Name:
+;
+;    FrameworkArgb.inf
+;
+;Abstract:
+;    INF file for installing HID minidriver (UMDF 2 version)
+;
+; Installation Notes:
+;    Using Devcon: Type "devcon install FrameworkArgb.inf root\FrameworkArgb" to install
+;
+; Important:
+;    This INF depends on MsHidUmdf.inf, which was introduced in build 22000
 
 [Version]
 Signature   = "$Windows NT$"
@@ -11,6 +24,17 @@ CatalogFile = FrameworkArgb.cat
 DriverVer   = ; TODO: set DriverVer in stampinf property pages
 PnpLockdown = 1
 
+[DestinationDirs]
+UMDriverCopy = 13
+
+[SourceDisksNames]
+1 = %DiskName%,,,
+
+[SourceDisksFiles]
+FrameworkArgb.dll = 1
+
+; ================= Device section =====================
+
 [Manufacturer]
 ; This driver package is only installable on Win11+
 %ManufacturerName% = Standard,NT$ARCH$.10.0...22000 ; wudfrd.inf introduced in build 22000
@@ -18,26 +42,31 @@ PnpLockdown = 1
 [Standard.NT$ARCH$.10.0...22000]
 %DeviceName% = FrameworkArgb, Root\FrameworkArgb ; TODO: edit hw-id
 
-[SourceDisksFiles]
-FrameworkArgb.dll = 1
-
-[SourceDisksNames]
-1 = %DiskName%
 
 ; =================== UMDF Device ==================================
 
 [FrameworkArgb.NT]
-CopyFiles = UMDriverCopy
-Include = wudfrd.inf
-Needs = WUDFRD.NT
+CopyFiles=UMDriverCopy
+Include=MsHidUmdf.inf
+Needs=MsHidUmdf.NT
+Include=WUDFRD.inf
+Needs=WUDFRD_LowerFilter.NT
 
 [FrameworkArgb.NT.hw]
-Include = wudfrd.inf
-Needs = WUDFRD.NT.HW
+Include=MsHidUmdf.inf
+Needs=MsHidUmdf.NT.hw
+Include=WUDFRD.inf
+Needs=WUDFRD_LowerFilter.NT.hw
 
 [FrameworkArgb.NT.Services]
-Include = wudfrd.inf
-Needs = WUDFRD.NT.Services
+Include=MsHidUmdf.inf
+Needs=MsHidUmdf.NT.Services
+Include=WUDFRD.inf
+Needs=WUDFRD_LowerFilter.NT.Services
+
+[FrameworkArgb.NT.Filters]
+Include=WUDFRD.inf
+Needs=WUDFRD_LowerFilter.NT.Filters
 
 [FrameworkArgb.NT.Wdf]
 UmdfService = FrameworkArgb,FrameworkArgb_Install
@@ -51,8 +80,7 @@ UmdfFsContextUsePolicy=CanUseFsContext2
 UmdfLibraryVersion = $UMDFVERSION$
 ServiceBinary = %13%\FrameworkArgb.dll
 
-[DestinationDirs]
-UMDriverCopy = 13
+; ================= copy files =====================
 
 [UMDriverCopy]
 FrameworkArgb.dll
@@ -63,3 +91,5 @@ FrameworkArgb.dll
 ManufacturerName="Framework Computer Inc"
 DiskName = "FrameworkArgb Installation Disk"
 DeviceName ="FrameworkArgb Device"
+ClassName          ="Sample Device"
+WudfRdDisplayName  ="Windows Driver Foundation - User-mode Driver Framework Reflector"
