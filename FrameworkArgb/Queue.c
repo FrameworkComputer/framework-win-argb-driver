@@ -16,6 +16,7 @@ Environment:
 
 #include "driver.h"
 #include "queue.tmh"
+#include "LampArray.h"
 
 #ifdef _KERNEL_MODE
 EVT_WDF_IO_QUEUE_IO_INTERNAL_DEVICE_CONTROL EvtIoDeviceControl;
@@ -514,23 +515,23 @@ Return Value:
 {
     NTSTATUS                status;
 
-    TraceInformation("%!FUNC! Entry");
+TraceInformation("%!FUNC! Entry");
 
-    //
-    // forward the request to manual queue
-    //
-    status = WdfRequestForwardToIoQueue(
-        Request,
-        QueueContext->DeviceContext->ManualQueue);
-    if (!NT_SUCCESS(status)) {
-        TraceError("WdfRequestForwardToIoQueue failed with 0x%x\n", status);
-        *CompleteRequest = TRUE;
-    }
-    else {
-        *CompleteRequest = FALSE;
-    }
+//
+// forward the request to manual queue
+//
+status = WdfRequestForwardToIoQueue(
+    Request,
+    QueueContext->DeviceContext->ManualQueue);
+if (!NT_SUCCESS(status)) {
+    TraceError("WdfRequestForwardToIoQueue failed with 0x%x\n", status);
+    *CompleteRequest = TRUE;
+}
+else {
+    *CompleteRequest = FALSE;
+}
 
-    return status;
+return status;
 }
 
 NTSTATUS
@@ -606,7 +607,6 @@ Return Value:
     return status;
 }
 
-
 HRESULT
 GetFeature(
     _In_  PQUEUE_CONTEXT    QueueContext,
@@ -633,8 +633,7 @@ Return Value:
     NTSTATUS                status;
     HID_XFER_PACKET         packet;
     ULONG                   reportSize;
-    PMY_DEVICE_ATTRIBUTES   myAttributes;
-    PHID_DEVICE_ATTRIBUTES  hidAttributes = &QueueContext->DeviceContext->HidDeviceAttributes;
+	PUCHAR                  responseBuffer;
 
     TraceInformation("%!FUNC! Entry");
 
@@ -645,52 +644,83 @@ Return Value:
         return status;
     }
 
-    if (packet.reportId != CONTROL_COLLECTION_REPORT_ID) {
+    reportSize = 0;
+	responseBuffer = packet.reportBuffer + sizeof(packet.reportId);
+
+    switch (packet.reportId) {
+    case LAMP_ARRAY_ATTRIBUTES_REPORT_ID:
+		TraceInformation("%!FUNC! LAMP_ARRAY_ATTRIBUTES_REPORT_ID");
+        reportSize = GetLampArrayAttributesReport(responseBuffer, QueueContext->DeviceContext, packet.reportBufferLen);
+        break;
+    case LAMP_ATTRIBUTES_REQUEST_REPORT_ID:
+		TraceError("%!FUNC! LAMP_ATTRIBUTES_REQUEST_REPORT_ID - Unsupported");
+        return STATUS_INVALID_PARAMETER;
+	case LAMP_ATTRIBUTES_RESPONSE_REPORT_ID:
+		TraceInformation("%!FUNC! LAMP_ATTRIBUTES_RESPONSE_REPORT_ID");
+        reportSize = GetLampAttributesResponseReport(responseBuffer, QueueContext->DeviceContext, packet.reportBufferLen);
+		break;
+	case LAMP_MULTI_UPDATE_REPORT_ID:
+		TraceError("%!FUNC! LAMP_MULTI_UPDATE_REPORT_ID - Unsupported");
+        return STATUS_INVALID_PARAMETER;
+	case LAMP_RANGE_UPDATE_REPORT_ID:
+		TraceError("%!FUNC! LAMP_RANGE_UPDATE_REPORT_ID - Unsupported");
+        return STATUS_INVALID_PARAMETER;
+	case LAMP_ARRAY_CONTROL_REPORT_ID:
+		TraceError("%!FUNC! LAMP_ARRAY_CONTROL_REPORT_ID - Unsupported");
+        return STATUS_INVALID_PARAMETER;
+    case CONTROL_COLLECTION_REPORT_ID:
+		TraceError("%!FUNC! CONTROL_COLLECTION_REPORT_ID - Unsupported");
+        break;
+    default:
         //
         // If collection ID is not for control collection then handle
         // this request just as you would for a regular collection.
         //
-        status = STATUS_INVALID_PARAMETER;
-        TraceError("GetFeature: invalid report id %d\n", packet.reportId);
-        return status;
+		TraceError("%!FUNC! invalid report id %d\n", packet.reportId);
+        return STATUS_INVALID_PARAMETER;
     }
 
-    //
-    // Since output buffer is for write only (no read allowed by UMDF in output
-    // buffer), any read from output buffer would be reading garbage), so don't
-    // let app embed custom control code in output buffer. The minidriver can
-    // support multiple features using separate report ID instead of using
-    // custom control code. Since this is targeted at report ID 1, we know it
-    // is a request for getting attributes.
-    //
-    // While KMDF does not enforce the rule (disallow read from output buffer),
-    // it is good practice to not do so.
-    //
+    ////
+    //// Since output buffer is for write only (no read allowed by UMDF in output
+    //// buffer), any read from output buffer would be reading garbage), so don't
+    //// let app embed custom control code in output buffer. The minidriver can
+    //// support multiple features using separate report ID instead of using
+    //// custom control code. Since this is targeted at report ID 1, we know it
+    //// is a request for getting attributes.
+    ////
+    //// While KMDF does not enforce the rule (disallow read from output buffer),
+    //// it is good practice to not do so.
+    ////
+    //reportSize = sizeof(MY_DEVICE_ATTRIBUTES) + sizeof(packet.reportId);
+    //if (packet.reportBufferLen < reportSize) {
+    //    status = STATUS_INVALID_BUFFER_SIZE;
+    //    TraceError("GetFeature: output buffer too small. Size %d, expect %d\n",
+    //        packet.reportBufferLen, reportSize);
+    //    return status;
+    //}
 
-    reportSize = sizeof(MY_DEVICE_ATTRIBUTES) + sizeof(packet.reportId);
-    if (packet.reportBufferLen < reportSize) {
-        status = STATUS_INVALID_BUFFER_SIZE;
-        TraceError("GetFeature: output buffer too small. Size %d, expect %d\n",
-            packet.reportBufferLen, reportSize);
-        return status;
-    }
-
-    //
-    // Since this device has one report ID, hidclass would pass on the report
-    // ID in the buffer (it wouldn't if report descriptor did not have any report
-    // ID). However, since UMDF allows only writes to an output buffer, we can't
-    // "read" the report ID from "output" buffer. There is no need to read the
-    // report ID since we get it other way as shown above, however this is
-    // something to keep in mind.
-    //
-    myAttributes = (PMY_DEVICE_ATTRIBUTES)(packet.reportBuffer + sizeof(packet.reportId));
-    myAttributes->ProductID = hidAttributes->ProductID;
-    myAttributes->VendorID = hidAttributes->VendorID;
-    myAttributes->VersionNumber = hidAttributes->VersionNumber;
+    ////
+    //// Since this device has one report ID, hidclass would pass on the report
+    //// ID in the buffer (it wouldn't if report descriptor did not have any report
+    //// ID). However, since UMDF allows only writes to an output buffer, we can't
+    //// "read" the report ID from "output" buffer. There is no need to read the
+    //// report ID since we get it other way as shown above, however this is
+    //// something to keep in mind.
+    ////
+    //myAttributes = (PMY_DEVICE_ATTRIBUTES)(packet.reportBuffer + sizeof(packet.reportId));
+    //myAttributes->ProductID = hidAttributes->ProductID;
+    //myAttributes->VendorID = hidAttributes->VendorID;
+    //myAttributes->VersionNumber = hidAttributes->VersionNumber;
 
     //
     // Report how many bytes were copied
     //
+    if (reportSize == 0) {
+		TraceError("%!FUNC! empty buffer. Not returning anything");
+        return STATUS_INVALID_BUFFER_SIZE;
+	}
+
+	TraceError("%!FUNC! Sending %d bytes", reportSize);
     WdfRequestSetInformation(Request, reportSize);
     return status;
 }
@@ -723,8 +753,7 @@ Return Value:
     NTSTATUS                status;
     HID_XFER_PACKET         packet;
     ULONG                   reportSize;
-    PFWK_ARGB_CONTROL_INFO   controlInfo;
-    PHID_DEVICE_ATTRIBUTES  hidAttributes = &QueueContext->DeviceContext->HidDeviceAttributes;
+    PUCHAR                  responseBuffer;
 
     TraceInformation("%!FUNC! Entry");
 
@@ -735,63 +764,103 @@ Return Value:
         return status;
     }
 
-    if (packet.reportId != CONTROL_COLLECTION_REPORT_ID) {
+    // No response
+    reportSize = 0;
+	responseBuffer = packet.reportBuffer + sizeof(packet.reportId);
+
+    switch (packet.reportId) {
+    case LAMP_ARRAY_ATTRIBUTES_REPORT_ID:
+		TraceInformation("%!FUNC! LAMP_ARRAY_ATTRIBUTES_REPORT_ID - Unsupported");
+        return STATUS_INVALID_PARAMETER;
+    case LAMP_ATTRIBUTES_REQUEST_REPORT_ID:
+		TraceInformation("%!FUNC! LAMP_ATTRIBUTES_REQUEST_REPORT_ID");
+		SetLampAttributesId(responseBuffer, QueueContext->DeviceContext);
+        break;
+	case LAMP_ATTRIBUTES_RESPONSE_REPORT_ID:
+		TraceInformation("%!FUNC! LAMP_ATTRIBUTES_RESPONSE_REPORT_ID - Unsupported");
+        return STATUS_INVALID_PARAMETER;
+	case LAMP_MULTI_UPDATE_REPORT_ID:
+		TraceInformation("%!FUNC! LAMP_MULTI_UPDATE_REPORT_ID");
+		SetMultipleLamps(responseBuffer, QueueContext->DeviceContext);
+		break;
+	case LAMP_RANGE_UPDATE_REPORT_ID:
+		TraceInformation("%!FUNC! LAMP_RANGE_UPDATE_REPORT_ID");
+		SetLampRange(responseBuffer, QueueContext->DeviceContext);
+		break;
+	case LAMP_ARRAY_CONTROL_REPORT_ID:
+		TraceInformation("%!FUNC! LAMP_ARRAY_CONTROL_REPORT_ID");
+		SetAutonomousMode(responseBuffer, QueueContext->DeviceContext);
+		break;
+    case CONTROL_COLLECTION_REPORT_ID:
+		TraceError("%!FUNC! CONTROL_COLLECTION_REPORT_ID - Unsupported");
+        break;
+    default:
         //
         // If collection ID is not for control collection then handle
         // this request just as you would for a regular collection.
         //
-        status = STATUS_INVALID_PARAMETER;
-        TraceError("SetFeature: invalid report id %d\n", packet.reportId);
-        return status;
+		TraceError("%!FUNC! invalid report id %d\n", packet.reportId);
+        return STATUS_INVALID_PARAMETER;
     }
 
-    //
-    // before touching control code make sure buffer is big enough.
-    //
-    reportSize = sizeof(FWK_ARGB_CONTROL_INFO);
+    //if (packet.reportId != CONTROL_COLLECTION_REPORT_ID) {
+    //    //
+    //    // If collection ID is not for control collection then handle
+    //    // this request just as you would for a regular collection.
+    //    //
+    //    status = STATUS_INVALID_PARAMETER;
+    //    TraceError("SetFeature: invalid report id %d\n", packet.reportId);
+    //    return status;
+    //}
 
-    if (packet.reportBufferLen < reportSize) {
-        status = STATUS_INVALID_BUFFER_SIZE;
-        TraceError("SetFeature: invalid input buffer. size %d, expect %d\n",
-            packet.reportBufferLen, reportSize);
-        return status;
-    }
+    ////
+    //// before touching control code make sure buffer is big enough.
+    ////
+    //reportSize = sizeof(FWK_ARGB_CONTROL_INFO);
 
-    controlInfo = (PFWK_ARGB_CONTROL_INFO)packet.reportBuffer;
+    //if (packet.reportBufferLen < reportSize) {
+    //    status = STATUS_INVALID_BUFFER_SIZE;
+    //    TraceError("SetFeature: invalid input buffer. size %d, expect %d\n",
+    //        packet.reportBufferLen, reportSize);
+    //    return status;
+    //}
 
-    switch (controlInfo->ControlCode)
-    {
-    case FWK_ARGB_CONTROL_CODE_SET_ATTRIBUTES:
-        //
-        // Store the device attributes in device extension
-        //
-        hidAttributes->ProductID = controlInfo->u.Attributes.ProductID;
-        hidAttributes->VendorID = controlInfo->u.Attributes.VendorID;
-        hidAttributes->VersionNumber = controlInfo->u.Attributes.VersionNumber;
+    //controlInfo = (PFWK_ARGB_CONTROL_INFO)packet.reportBuffer;
 
-        //
-        // set status and information
-        //
-        WdfRequestSetInformation(Request, reportSize);
-        break;
+    //switch (controlInfo->ControlCode)
+    //{
+    //case FWK_ARGB_CONTROL_CODE_SET_ATTRIBUTES:
+    //    //
+    //    // Store the device attributes in device extension
+    //    //
+    //    hidAttributes->ProductID = controlInfo->u.Attributes.ProductID;
+    //    hidAttributes->VendorID = controlInfo->u.Attributes.VendorID;
+    //    hidAttributes->VersionNumber = controlInfo->u.Attributes.VersionNumber;
 
-    case FWK_ARGB_CONTROL_CODE_DUMMY1:
-        status = STATUS_NOT_IMPLEMENTED;
-        TraceInformation("SetFeature: FWK_ARGB_CONTROL_CODE_DUMMY1\n");
-        break;
+    //    //
+    //    // set status and information
+    //    //
+    //    WdfRequestSetInformation(Request, reportSize);
+    //    break;
 
-    case FWK_ARGB_CONTROL_CODE_DUMMY2:
-        status = STATUS_NOT_IMPLEMENTED;
-        TraceInformation("SetFeature: FWK_ARGB_CONTROL_CODE_DUMMY2\n");
-        break;
+    //case FWK_ARGB_CONTROL_CODE_DUMMY1:
+    //    status = STATUS_NOT_IMPLEMENTED;
+    //    TraceInformation("SetFeature: FWK_ARGB_CONTROL_CODE_DUMMY1\n");
+    //    break;
 
-    default:
-        status = STATUS_NOT_IMPLEMENTED;
-        TraceInformation("SetFeature: Unknown control Code 0x%x\n",
-            controlInfo->ControlCode);
-        break;
-    }
+    //case FWK_ARGB_CONTROL_CODE_DUMMY2:
+    //    status = STATUS_NOT_IMPLEMENTED;
+    //    TraceInformation("SetFeature: FWK_ARGB_CONTROL_CODE_DUMMY2\n");
+    //    break;
 
+    //default:
+    //    status = STATUS_NOT_IMPLEMENTED;
+    //    TraceInformation("SetFeature: Unknown control Code 0x%x\n",
+    //        controlInfo->ControlCode);
+    //    break;
+    //}
+
+    WdfRequestSetInformation(Request, reportSize);
     return status;
 }
 

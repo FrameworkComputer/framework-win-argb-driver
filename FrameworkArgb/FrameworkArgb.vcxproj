@@ -26,11 +26,14 @@
     <ClCompile Include="Driver.c" />
     <ClCompile Include="EcCommunication.cpp" />
     <ClCompile Include="Queue.c" />
+    <ClCompile Include="LampArray.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Device.h" />
     <ClInclude Include="Driver.h" />
     <ClInclude Include="EcCommunication.h" />
+    <ClInclude Include="LampArrayStructs.h" />
+    <ClInclude Include="LampArray.h" />
     <ClInclude Include="Public.h" />
     <ClInclude Include="Queue.h" />
     <ClInclude Include="Trace.h" />

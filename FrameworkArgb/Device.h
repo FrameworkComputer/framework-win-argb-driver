@@ -13,20 +13,27 @@ Environment:
     User-mode Driver Framework 2
 
 --*/
-
+#pragma once
 #include "public.h"
 #include <windows.h>
 #include <wdf.h>
 #include <hidport.h>  // located in $(DDK_INC_PATH)/wdm
+#include "LampArrayStructs.h"
 
 EXTERN_C_START
-
 
 typedef UCHAR HID_REPORT_DESCRIPTOR, * PHID_REPORT_DESCRIPTOR;
 
 DRIVER_INITIALIZE                   DriverEntry;
 EVT_WDF_DRIVER_DEVICE_ADD           EvtDeviceAdd;
 EVT_WDF_TIMER                       EvtTimerFunc;
+
+#define LAMPARRAY_LAMP_COUNT        8
+#define LAMPARRAY_WIDTH             80000   // 80mm
+#define LAMPARRAY_HEIGHT            80000   // 80mm
+#define LAMPARRAY_DEPTH             20000   // 20mm
+#define LAMPARRAY_KIND              0x07    // LampArrayKindChassis
+#define LAMPARRAY_UPDATE_INTERVAL   100000  // 10ms
 
 //
 // The device context performs the same job as
@@ -39,10 +46,12 @@ typedef struct _DEVICE_CONTEXT
     WDFQUEUE                ManualQueue;
     HID_DEVICE_ATTRIBUTES   HidDeviceAttributes;
     BYTE                    DeviceData;
+    UINT16                  CurrentLampId;
+	BOOLEAN  		        AutonomousMode;
+    Position                LampPositions[LAMPARRAY_LAMP_COUNT];
     HID_DESCRIPTOR          HidDescriptor;
     PHID_REPORT_DESCRIPTOR  ReportDescriptor;
     BOOLEAN                 ReadReportDescFromRegistry;
-
 } DEVICE_CONTEXT, * PDEVICE_CONTEXT;
 
 //
@@ -183,10 +192,13 @@ RequestGetHidXferPacket_ToWriteToDevice(
 #define  FWK_ARGB_CONTROL_CODE_DUMMY1                      0x01
 #define  FWK_ARGB_CONTROL_CODE_DUMMY2                      0x02
 
-//
-// This is the report id of the collection to which the control codes are sent
-//
-#define CONTROL_COLLECTION_REPORT_ID                      0x01
+#define LAMP_ARRAY_ATTRIBUTES_REPORT_ID    0x01
+#define LAMP_ATTRIBUTES_REQUEST_REPORT_ID  0x02
+#define LAMP_ATTRIBUTES_RESPONSE_REPORT_ID 0x03
+#define LAMP_MULTI_UPDATE_REPORT_ID        0x04
+#define LAMP_RANGE_UPDATE_REPORT_ID        0x05
+#define LAMP_ARRAY_CONTROL_REPORT_ID       0x06
+#define CONTROL_COLLECTION_REPORT_ID       0x07
 
 #define MAXIMUM_STRING_LENGTH           (126 * sizeof(WCHAR))
 #define FWK_ARGB_MANUFACTURER_STRING    L"Framework"
@@ -194,6 +206,7 @@ RequestGetHidXferPacket_ToWriteToDevice(
 #define FWK_ARGB_SERIAL_NUMBER_STRING   L"FRAMPBCP00"
 #define FWK_ARGB_DEVICE_STRING          L"Desktop UMDF ARGB Device"
 #define FWK_ARGB_DEVICE_STRING_INDEX    5
+
 #include <pshpack1.h>
 
 typedef struct _MY_DEVICE_ATTRIBUTES {

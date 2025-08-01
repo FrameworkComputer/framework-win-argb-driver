@@ -17,13 +17,6 @@ Environment:
 #include "driver.h"
 #include "device.tmh"
 
-#define  LAMP_ARRAY_ATTRIBUTES_REPORT_ID    0x01
-#define  LAMP_ATTRIBUTES_REQUEST_REPORT_ID  0x02
-#define  LAMP_ATTRIBUTES_RESPONSE_REPORT_ID 0x03
-#define  LAMP_MULTI_UPDATE_REPORT_ID        0x04
-#define  LAMP_RANGE_UPDATE_REPORT_ID        0x05
-#define  LAMP_ARRAY_CONTROL_REPORT_ID       0x06
-
 //
 // This is the default report descriptor for the virtual Hid device returned
 // by the mini driver in response to IOCTL_HID_GET_REPORT_DESCRIPTOR.
@@ -264,6 +257,30 @@ Return Value:
     //
     deviceContext->Device = device;
     deviceContext->DeviceData = 0;
+    deviceContext->CurrentLampId = 0;
+    deviceContext->AutonomousMode = TRUE;
+    // 8 LEDs in a circle
+    // z is 0 for all LEDs, they're all in the same plane
+    // Bottom LED
+    deviceContext->LampPositions[0].x = 40000;
+    deviceContext->LampPositions[0].y = 0;
+    deviceContext->LampPositions[1].x = 60000;
+    deviceContext->LampPositions[1].y = 20000;
+    // Right LED
+    deviceContext->LampPositions[2].x = 80000;
+    deviceContext->LampPositions[2].y = 40000;
+    deviceContext->LampPositions[3].x = 60000;
+    deviceContext->LampPositions[3].y = 60000;
+    // Top LED
+    deviceContext->LampPositions[4].x = 40000;
+    deviceContext->LampPositions[4].y = 80000;
+    deviceContext->LampPositions[5].x = 20000;
+    deviceContext->LampPositions[5].y = 60000;
+    // Left LED
+    deviceContext->LampPositions[6].x = 0;
+    deviceContext->LampPositions[6].y = 40000;
+    deviceContext->LampPositions[7].x = 20000;
+    deviceContext->LampPositions[7].y = 20000;
 
     hidAttributes = &deviceContext->HidDeviceAttributes;
     RtlZeroMemory(hidAttributes, sizeof(HID_DEVICE_ATTRIBUTES));
