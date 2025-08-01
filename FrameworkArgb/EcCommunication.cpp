@@ -119,7 +119,7 @@ int CrosEcReadMemU8(HANDLE Handle, unsigned int offset, UINT8* dest)
 
     if (Handle == INVALID_HANDLE_VALUE) {
         Status = STATUS_INVALID_HANDLE;
-        TraceError("COMBO %!FUNC! Invalid Handle");
+        TraceError("%!FUNC! Invalid Handle");
         return 0;
     }
 
@@ -134,11 +134,11 @@ int CrosEcReadMemU8(HANDLE Handle, unsigned int offset, UINT8* dest)
         &retb,
         nullptr);
     if (!NT_SUCCESS(Status)) {
-        TraceError("COMBO %!FUNC! ConnectToEc failed %!STATUS!", Status);
+        TraceError("%!FUNC! ConnectToEc failed %!STATUS!", Status);
         return 0;
     }
 
-    TraceInformation("COMBO %!FUNC! Successfully read %d bytes from EC memory at %02x. First one %02x. retb=%d", rm.bytes, rm.offset, rm.buffer[0], retb);
+    TraceInformation("%!FUNC! Successfully read %d bytes from EC memory at %02x. First one %02x. retb=%d", rm.bytes, rm.offset, rm.buffer[0], retb);
     *dest = rm.buffer[0];
 
     return rm.bytes;
