@@ -54,7 +54,7 @@ int CrosEcSendCommand(
     DWORD retb{};
     CROSEC_COMMAND cmd{};
 
-    if (Handle == INVALID_HANDLE_VALUE) {
+    if (Handle == NULL || Handle == INVALID_HANDLE_VALUE) {
         Status = STATUS_INVALID_HANDLE;
         TraceError("%!FUNC! Invalid Handle");
         return 0;
@@ -117,7 +117,7 @@ int CrosEcReadMemU8(HANDLE Handle, unsigned int offset, UINT8* dest)
     DWORD retb{};
     CROSEC_READMEM rm{};
 
-    if (Handle == INVALID_HANDLE_VALUE) {
+    if (Handle == NULL || Handle == INVALID_HANDLE_VALUE) {
         Status = STATUS_INVALID_HANDLE;
         TraceError("%!FUNC! Invalid Handle");
         return 0;

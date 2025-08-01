@@ -157,9 +157,8 @@ Return Value:
     TraceInformation("%!FUNC! Entry");
 
     DeviceContext = GetDeviceContext(DriverObject);
-
     // Close handle to EC driver
-    if (DeviceContext->CrosEcHandle && DeviceContext->CrosEcHandle != INVALID_HANDLE_VALUE) {
+    if (DeviceContext && DeviceContext->CrosEcHandle && DeviceContext->CrosEcHandle != INVALID_HANDLE_VALUE) {
         CloseHandle(DeviceContext->CrosEcHandle);
         DeviceContext->CrosEcHandle = INVALID_HANDLE_VALUE;
         TraceError("%!FUNC! Failed to close CrosEc Handle");
