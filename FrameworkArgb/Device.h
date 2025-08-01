@@ -46,6 +46,7 @@ typedef struct _DEVICE_CONTEXT
     WDFQUEUE                ManualQueue;
     HID_DEVICE_ATTRIBUTES   HidDeviceAttributes;
     BYTE                    DeviceData;
+    HANDLE                  CrosEcHandle;
     UINT16                  CurrentLampId;
 	BOOLEAN  		        AutonomousMode;
     Position                LampPositions[LAMPARRAY_LAMP_COUNT];

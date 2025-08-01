@@ -17,6 +17,41 @@ Environment:
 #include "driver.h"
 #include "LampArray.tmh"
 #include "LampArray.h"
+#include "EcCommunication.h"
+
+void CrosEcSetColorRange(HANDLE Handle, UINT16 LampIdStart, UINT16 LampIdEnd, LampColor *Color)
+{
+    EC_REQUEST_RGB_KBD_SET_COLOR cmd{};
+    cmd.StartKey = (UINT8)  LampIdStart;
+    cmd.Length = (UINT8) (LampIdEnd - LampIdStart) + 1;
+    for (UINT8 i = 0; i < cmd.Length; i++) {
+        if (Color->intensity == 1) {
+            cmd.Colors[i].r = Color->red;
+            cmd.Colors[i].g = Color->green;
+            cmd.Colors[i].b = Color->blue;
+        }
+        // TODO: Handle intensity, but I don't think it's normally used
+        // cmd.Colors[i].intensity = Color->intensity;
+    }
+    if (Color->intensity != 1 && Color->intensity != 1) {
+        TraceError("%!FUNC! Intensity is %d, not 0 or 1, should handle that", Color->intensity);
+    }
+
+    CrosEcSendCommand(
+        Handle,
+        EC_CMD_RGBKBD_SET_COLOR,
+        0,
+        &cmd,
+        sizeof(cmd),
+        &cmd,
+        sizeof(cmd)
+    );
+}
+
+void CrosEcSetColor(HANDLE Handle, UINT16 LampId, LampColor *Color)
+{
+    CrosEcSetColorRange(Handle, LampId, LampId, Color);
+}
 
 ULONG
 GetLampArrayAttributesReport(
@@ -83,7 +118,6 @@ GetLampAttributesResponseReport(
 
 }
 
-
 void SetLampAttributesId(
     _In_        PUCHAR          ReportBuffer,
     _In_ _Out_  PDEVICE_CONTEXT DeviceContext
@@ -109,8 +143,7 @@ void SetMultipleLamps(
 			report->colors[i].blue,
 			report->colors[i].intensity
 		);
-		DeviceContext = DeviceContext;
-        // NeopixelSetColor(report->lampIds[i], report->colors[i]);
+        CrosEcSetColor(DeviceContext->CrosEcHandle, report->lampIds[i], &report->colors[i]);
     }
 }
 
@@ -128,8 +161,7 @@ void SetLampRange(
         report->color.blue,
 		report->color.intensity
     );
-    DeviceContext = DeviceContext;
-    // CrosEcSetColorRange(report->lampIdStart, report->lampIdEnd, report->color);
+    CrosEcSetColorRange(DeviceContext->CrosEcHandle, report->lampIdStart, report->lampIdEnd, &report->color);
 }
 
 void SetAutonomousMode(
@@ -141,5 +173,5 @@ void SetAutonomousMode(
 
     TraceInformation("%!FUNC! AutonomousMode: %d", report->autonomousMode);
 	DeviceContext->AutonomousMode = report->autonomousMode != 0;
-    // CrosEcSetEffect(report->autonomousMode ? AUTONOMOUS_LIGHTING_EFFECT : HID, AUTONOMOUS_LIGHTING_COLOR);
+    // Not doing anything here, unless we want to have a default animation
 }

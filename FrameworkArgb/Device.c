@@ -15,6 +15,7 @@ Environment:
 --*/
 
 #include "driver.h"
+#include "EcCommunication.h"
 #include "device.tmh"
 
 //
@@ -288,6 +289,13 @@ Return Value:
     hidAttributes->VendorID = FWK_ARGB_HID_VID;
     hidAttributes->ProductID = FWK_ARGB_HID_PID;
     hidAttributes->VersionNumber = FWK_ARGB_HID_VERSION;
+
+    deviceContext->CrosEcHandle = INVALID_HANDLE_VALUE;
+    status = ConnectToEc(&deviceContext->CrosEcHandle);
+    if (!NT_SUCCESS(status)) {
+        TraceError("COMBO %!FUNC! ConnectToEc failed %!STATUS!", status);
+        return status;
+    }
 
     status = QueueCreate(device,
         &deviceContext->DefaultQueue);
