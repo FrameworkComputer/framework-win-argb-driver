@@ -152,9 +152,18 @@ Return Value:
 
 --*/
 {
-    UNREFERENCED_PARAMETER(DriverObject);
+    PDEVICE_CONTEXT DeviceContext;
 
     TraceInformation("%!FUNC! Entry");
+
+    DeviceContext = GetDeviceContext(DriverObject);
+    // Close handle to EC driver
+    if (DeviceContext && DeviceContext->CrosEcHandle && DeviceContext->CrosEcHandle != INVALID_HANDLE_VALUE) {
+        CloseHandle(DeviceContext->CrosEcHandle);
+        DeviceContext->CrosEcHandle = INVALID_HANDLE_VALUE;
+        TraceError("%!FUNC! Failed to close CrosEc Handle");
+    }
+    TraceInformation("%!FUNC! Closed CrosEc Handle");
 
     //
     // Stop WPP Tracing
