@@ -73,7 +73,7 @@ GetLampArrayAttributesReport(
         DeviceContext->LampCount,
         DeviceContext->Width,
         DeviceContext->Height,
-        LAMPARRAY_DEPTH,
+        DeviceContext->Depth,
         LAMPARRAY_KIND,
         LAMPARRAY_UPDATE_INTERVAL
     };

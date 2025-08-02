@@ -62,7 +62,7 @@ For example to control just 4 LEDs on the fan:
 
 ```
 sudo reg add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Enum\ROOT\HIDCLASS\0000\Device Parameters" /v ReadFromRegistry /t REG_DWORD /d 1
-sudo reg add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Enum\ROOT\HIDCLASS\0000\Device Parameters" /v LedCount /t REG_DWORD /d 4
+sudo reg add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Enum\ROOT\HIDCLASS\0000\Device Parameters" /v LedCount /t REG_DWORD /d 8
 sudo reg add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Enum\ROOT\HIDCLASS\0000\Device Parameters" /v LedArrangement /t REG_DWORD /d 0
 ```
 

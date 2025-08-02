@@ -220,29 +220,38 @@ CalculateLampPositions(
     case 0:
         DeviceContext->Width = 80000;
         DeviceContext->Height = 80000;
+        DeviceContext->Depth = 2000 * (LampCount / 8);
         for (UINT8 i = 0; i <= LampCount / 8; i++) {
             // 8 LEDs in a circle
             // z is 0 for all LEDs, they're all in the same plane
             // Bottom LED
             DeviceContext->LampPositions[i+0].x = 40000;
             DeviceContext->LampPositions[i+0].y = 0;
+            DeviceContext->LampPositions[i+0].z = 2000 * i;
             DeviceContext->LampPositions[i+1].x = 60000;
             DeviceContext->LampPositions[i+1].y = 20000;
+            DeviceContext->LampPositions[i+1].z = 2000 * i;
             // Right LED
             DeviceContext->LampPositions[i+2].x = 80000;
             DeviceContext->LampPositions[i+2].y = 40000;
+            DeviceContext->LampPositions[i+2].z = 2000 * i;
             DeviceContext->LampPositions[i+3].x = 60000;
             DeviceContext->LampPositions[i+3].y = 60000;
+            DeviceContext->LampPositions[i+3].z = 2000 * i;
             // Top LED
             DeviceContext->LampPositions[i+4].x = 40000;
             DeviceContext->LampPositions[i+4].y = 80000;
-            DeviceContext->LampPositions[i+5].x = 20000;
+            DeviceContext->LampPositions[i+1].z = 2000 * i;
+            DeviceContext->LampPositions[i+4].x = 20000;
             DeviceContext->LampPositions[i+5].y = 60000;
+            DeviceContext->LampPositions[i+5].z = 2000 * i;
             // Left LED
             DeviceContext->LampPositions[i+6].x = 0;
             DeviceContext->LampPositions[i+6].y = 40000;
+            DeviceContext->LampPositions[i+6].z = 2000 * i;
             DeviceContext->LampPositions[i+7].x = 20000;
             DeviceContext->LampPositions[i+7].y = 20000;
+            DeviceContext->LampPositions[i+7].z = 2000 * i;
         }
         break;
     // LEDs arranged in a circle single layer, even distance from each other
@@ -356,6 +365,7 @@ Return Value:
     deviceContext->LampCount = 0;
     deviceContext->Width = 0;
     deviceContext->Height = 0;
+    deviceContext->Depth = 2000;
     LedArrangement = 0;
     status = CheckRegistryForLedConfig(device);
     if (NT_SUCCESS(status)) {
