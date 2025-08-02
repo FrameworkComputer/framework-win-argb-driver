@@ -1,49 +1,51 @@
 # Framework Windows ARGB Driver
 
-Resources:
+This driver implements a HID device with support for the ["Lighting And IlluminationPage"](https://www.usb.org/sites/default/files/hutrr84_-_lighting_and_illumination_page.pdf)
+for the ARGB connector on the Framework Desktop, that is commonly used with an RGB fan.
 
-- Documentation
-  - https://learn.microsoft.com/en-us/windows-hardware/design/component-guidelines/dynamic-lighting-devices
-  - https://www.usb.org/sites/default/files/hutrr84_-_lighting_and_illumination_page.pdf
-  - https://www.usb.org/document-library/hid-usage-tables-16
-- Drivers
-    - https://github.com/microsoft/Windows-driver-samples/tree/main/hid/vhidmini2
-      - Can use this as a base, pretends to be a HID device
-- Firmware
-    - https://github.com/hathach/tinyusb/blob/29ffd57237554b1f2339af543e3789ae04d3b29b/src/class/hid/hid_device.h#L495
-    - https://github.com/microsoft/RP2040MacropadHidSample/blob/main/src/usb_descriptors.c#L76
-  - https://github.com/microsoft/ArduinoHidForWindows
-- Software
-  - https://github.com/microsoft/Dynamic-Lighting-AutoRGB
-  - https://github.com/microsoft/Windows-universal-samples/tree/main/Samples/LampArray
+Applications/Drivers that can interface with this type of HID device can control the connected LEDs.
+Additionally Windows has a "Dynamic Lighting" API that can be controlled via Windows settings and that third party applications can interact with.
 
-Implementation steps:
+## Applications
 
-- [x] Make a UMDF driver
-- [ ] Make it act as a HID device
-  - [ ] https://learn.microsoft.com/en-us/windows-hardware/drivers/wdf/creating-umdf-hid-minidrivers
-    - [x] Set INF directives
-- [ ] Adjust HID report descriptor to Lighting and Illumination spec
-- [ ] Test with Lighting Settings
-- [ ] Hook up reports to CrosEC
-- [ ] Sign it with EV Cert
-- [ ] Run HLK tests
-- [ ] Sign it with WHQL
+### Windows Dynamic Lighting
+
+In Windows Settings => Personalization => Dynamic Lighting you can control the LEDs.
+
+Applications:
+
+- Microsoft Samples
+  - [LampArray sample](https://github.com/microsoft/Windows-universal-samples/tree/main/Samples/LampArray) has multiple different ways for the user to control the LEDs
+  - [Dynamic-Lighting-AutoRGB](https://github.com/microsoft/Dynamic-Lighting-AutoRGB) sets lighting based on average screen color
+
+References:
+
+- [End User Documentation](https://support.microsoft.com/en-us/windows/control-dynamic-lighting-devices-in-windows-8e8f22e3-e820-476c-8f9d-9ffc7b6ffcd2)
+- [Developer Documentation](https://learn.microsoft.com/en-us/windows-hardware/design/component-guidelines/dynamic-lighting-devices)
+- Windows UWP API
+  - [Overview](https://learn.microsoft.com/en-us/windows/uwp/devices-sensors/lighting-dynamic-lamparray)
+  - [Windows.Devices.Lights](https://learn.microsoft.com/en-us/uwp/api/windows.devices.lights?view=winrt-26100)
+  - [Windows.Devices.Lights.Effects](https://learn.microsoft.com/en-us/uwp/api/windows.devices.lights.effects?view=winrt-26100)
+  - [Windows.Devices.Enumeration](https://learn.microsoft.com/en-us/uwp/api/windows.devices.enumeration.devicewatcher?view=winrt-26100)
+- [Game Dev Documentation](https://learn.microsoft.com/en-us/gaming/gdk/docs/features/common/lighting/gc-lighting-toc)
 
 ## Development
+
+### Build
 
 Follow [Microsoft's instructions](https://learn.microsoft.com/en-us/windows-hardware/drivers/download-the-wdk)
 to install Visual Studio, Windows SDK and WDK.
 I tried to install the SDK and WDK using winget but it either failed or couldn't get detected by Visual Studio.
 
-### Build
-
-Use Visual Studio 2022 Community Edition.
+Use Visual Studio 2022 Community Edition and build the project.
 
 ### Install
 
 ```
-sudo pnputil /add-driver .\FrameworkArgb\x64\Debug\FrameworkArgb\FrameworkArgb.inf /install
+# Software device right now
 cp "C:\Program Files (x86)\Windows Kits\10\Tools\10.0.26100.0\x64\devcon.exe" .
 sudo .\devcon install .\FrameworkArgb\x64\Debug\FrameworkArgb\FrameworkArgb.inf root\FrameworkArgb
+
+# Soon with ACPI device in updated BIOS
+sudo pnputil /add-driver .\FrameworkArgb\x64\Debug\FrameworkArgb\FrameworkArgb.inf /install
 ```
