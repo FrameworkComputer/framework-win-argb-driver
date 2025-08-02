@@ -22,6 +22,8 @@ Environment:
 // This is the default report descriptor for the virtual Hid device returned
 // by the mini driver in response to IOCTL_HID_GET_REPORT_DESCRIPTOR.
 //
+// It's taken straight from the HID specification for LampArray devices, no changes needed.
+//
 HID_REPORT_DESCRIPTOR G_DefaultReportDescriptor[] = {
     0x05, 0x59,                                 // USAGE_PAGE (LightingAndIllumination)
     0x09, 0x01,                                 // USAGE (LampArray)
@@ -257,7 +259,6 @@ Return Value:
     // Initialize the context.
     //
     deviceContext->Device = device;
-    deviceContext->DeviceData = 0;
     deviceContext->CurrentLampId = 0;
     deviceContext->AutonomousMode = TRUE;
     // 8 LEDs in a circle

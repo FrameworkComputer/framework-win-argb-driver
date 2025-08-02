@@ -45,7 +45,6 @@ typedef struct _DEVICE_CONTEXT
     WDFQUEUE                DefaultQueue;
     WDFQUEUE                ManualQueue;
     HID_DEVICE_ATTRIBUTES   HidDeviceAttributes;
-    BYTE                    DeviceData;
     HANDLE                  CrosEcHandle;
     UINT16                  CurrentLampId;
 	BOOLEAN  		        AutonomousMode;
@@ -207,70 +206,6 @@ RequestGetHidXferPacket_ToWriteToDevice(
 #define FWK_ARGB_SERIAL_NUMBER_STRING   L"FRAMPBCP00"
 #define FWK_ARGB_DEVICE_STRING          L"Desktop UMDF ARGB Device"
 #define FWK_ARGB_DEVICE_STRING_INDEX    5
-
-#include <pshpack1.h>
-
-typedef struct _MY_DEVICE_ATTRIBUTES {
-
-    USHORT          VendorID;
-    USHORT          ProductID;
-    USHORT          VersionNumber;
-
-} MY_DEVICE_ATTRIBUTES, * PMY_DEVICE_ATTRIBUTES;
-
-typedef struct _FWK_ARGB_CONTROL_INFO {
-
-    //
-    //report ID of the collection to which the control request is sent
-    //
-    UCHAR    ReportId;
-
-    //
-    // One byte control code (user-defined) for communication with hid 
-    // mini driver
-    //
-    UCHAR   ControlCode;
-
-    //
-    // This union contains input data for the control request.
-    //
-    union {
-        MY_DEVICE_ATTRIBUTES Attributes;
-        struct {
-            ULONG Dummy1;
-            ULONG Dummy2;
-        } Dummy;
-    } u;
-
-} FWK_ARGB_CONTROL_INFO, * PFWK_ARGB_CONTROL_INFO;
-
-//
-// input from device to system
-//
-typedef struct _FWK_ARGB_INPUT_REPORT {
-
-    UCHAR ReportId;
-
-    UCHAR Data;
-
-} FWK_ARGB_INPUT_REPORT, * PFWK_ARGB_INPUT_REPORT;
-
-//
-// output to device from system
-//
-typedef struct _FWK_ARGB_OUTPUT_REPORT {
-
-    UCHAR ReportId;
-
-    UCHAR Data;
-
-    USHORT Pad1;
-
-    ULONG Pad2;
-
-} FWK_ARGB_OUTPUT_REPORT, * PFWK_ARGB_OUTPUT_REPORT;
-
-#include <poppack.h>
 
 //
 // SetFeature request requires that the feature report buffer size be exactly 

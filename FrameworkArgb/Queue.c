@@ -561,7 +561,8 @@ Return Value:
     NTSTATUS                status;
     HID_XFER_PACKET         packet;
     ULONG                   reportSize;
-    PFWK_ARGB_OUTPUT_REPORT  outputReport;
+
+    UNREFERENCED_PARAMETER(QueueContext);
 
     TraceInformation("%!FUNC! Entry");
 
@@ -572,33 +573,9 @@ Return Value:
         return status;
     }
 
-    if (packet.reportId != CONTROL_COLLECTION_REPORT_ID) {
-        //
-        // Return error for unknown collection
-        //
-        status = STATUS_INVALID_PARAMETER;
-        TraceError("WriteReport: unkown report id %d\n", packet.reportId);
-        return status;
-    }
-
-    //
-    // before touching buffer make sure buffer is big enough.
-    //
-    reportSize = sizeof(FWK_ARGB_OUTPUT_REPORT);
-
-    if (packet.reportBufferLen < reportSize) {
-        status = STATUS_INVALID_BUFFER_SIZE;
-        TraceError("WriteReport: invalid input buffer. size %d, expect %d\n",
-            packet.reportBufferLen, reportSize);
-        return status;
-    }
-
-    outputReport = (PFWK_ARGB_OUTPUT_REPORT)packet.reportBuffer;
-
-    //
-    // Store the device data in device extension.
-    //
-    QueueContext->DeviceContext->DeviceData = outputReport->Data;
+    TraceError("WriteReport: with ReportID %d and size: %d\n", packet.reportId, packet.reportBufferLen);
+    status = STATUS_INVALID_PARAMETER;
+    reportSize = 0;
 
     //
     // set status and information
@@ -680,37 +657,23 @@ Return Value:
         return STATUS_INVALID_PARAMETER;
     }
 
-    ////
-    //// Since output buffer is for write only (no read allowed by UMDF in output
-    //// buffer), any read from output buffer would be reading garbage), so don't
-    //// let app embed custom control code in output buffer. The minidriver can
-    //// support multiple features using separate report ID instead of using
-    //// custom control code. Since this is targeted at report ID 1, we know it
-    //// is a request for getting attributes.
-    ////
-    //// While KMDF does not enforce the rule (disallow read from output buffer),
-    //// it is good practice to not do so.
-    ////
-    //reportSize = sizeof(MY_DEVICE_ATTRIBUTES) + sizeof(packet.reportId);
-    //if (packet.reportBufferLen < reportSize) {
-    //    status = STATUS_INVALID_BUFFER_SIZE;
-    //    TraceError("GetFeature: output buffer too small. Size %d, expect %d\n",
-    //        packet.reportBufferLen, reportSize);
-    //    return status;
-    //}
-
-    ////
-    //// Since this device has one report ID, hidclass would pass on the report
-    //// ID in the buffer (it wouldn't if report descriptor did not have any report
-    //// ID). However, since UMDF allows only writes to an output buffer, we can't
-    //// "read" the report ID from "output" buffer. There is no need to read the
-    //// report ID since we get it other way as shown above, however this is
-    //// something to keep in mind.
-    ////
-    //myAttributes = (PMY_DEVICE_ATTRIBUTES)(packet.reportBuffer + sizeof(packet.reportId));
-    //myAttributes->ProductID = hidAttributes->ProductID;
-    //myAttributes->VendorID = hidAttributes->VendorID;
-    //myAttributes->VersionNumber = hidAttributes->VersionNumber;
+    //
+    // Since output buffer is for write only (no read allowed by UMDF in output
+    // buffer), any read from output buffer would be reading garbage), so don't
+    // let app embed custom control code in output buffer. The minidriver can
+    // support multiple features using separate report ID instead of using
+    // custom control code. Since this is targeted at report ID 1, we know it
+    // is a request for getting attributes.
+    //
+    // While KMDF does not enforce the rule (disallow read from output buffer),
+    // it is good practice to not do so.
+    // Since this device has one report ID, hidclass would pass on the report
+    // ID in the buffer (it wouldn't if report descriptor did not have any report
+    // ID). However, since UMDF allows only writes to an output buffer, we can't
+    // "read" the report ID from "output" buffer. There is no need to read the
+    // report ID since we get it other way as shown above, however this is
+    // something to keep in mind.
+    //
 
     //
     // Report how many bytes were copied
@@ -791,9 +754,6 @@ Return Value:
 		TraceInformation("%!FUNC! LAMP_ARRAY_CONTROL_REPORT_ID");
 		SetAutonomousMode(responseBuffer, QueueContext->DeviceContext);
 		break;
-    case CONTROL_COLLECTION_REPORT_ID:
-		TraceError("%!FUNC! CONTROL_COLLECTION_REPORT_ID - Unsupported");
-        break;
     default:
         //
         // If collection ID is not for control collection then handle
@@ -802,63 +762,6 @@ Return Value:
 		TraceError("%!FUNC! invalid report id %d\n", packet.reportId);
         return STATUS_INVALID_PARAMETER;
     }
-
-    //if (packet.reportId != CONTROL_COLLECTION_REPORT_ID) {
-    //    //
-    //    // If collection ID is not for control collection then handle
-    //    // this request just as you would for a regular collection.
-    //    //
-    //    status = STATUS_INVALID_PARAMETER;
-    //    TraceError("SetFeature: invalid report id %d\n", packet.reportId);
-    //    return status;
-    //}
-
-    ////
-    //// before touching control code make sure buffer is big enough.
-    ////
-    //reportSize = sizeof(FWK_ARGB_CONTROL_INFO);
-
-    //if (packet.reportBufferLen < reportSize) {
-    //    status = STATUS_INVALID_BUFFER_SIZE;
-    //    TraceError("SetFeature: invalid input buffer. size %d, expect %d\n",
-    //        packet.reportBufferLen, reportSize);
-    //    return status;
-    //}
-
-    //controlInfo = (PFWK_ARGB_CONTROL_INFO)packet.reportBuffer;
-
-    //switch (controlInfo->ControlCode)
-    //{
-    //case FWK_ARGB_CONTROL_CODE_SET_ATTRIBUTES:
-    //    //
-    //    // Store the device attributes in device extension
-    //    //
-    //    hidAttributes->ProductID = controlInfo->u.Attributes.ProductID;
-    //    hidAttributes->VendorID = controlInfo->u.Attributes.VendorID;
-    //    hidAttributes->VersionNumber = controlInfo->u.Attributes.VersionNumber;
-
-    //    //
-    //    // set status and information
-    //    //
-    //    WdfRequestSetInformation(Request, reportSize);
-    //    break;
-
-    //case FWK_ARGB_CONTROL_CODE_DUMMY1:
-    //    status = STATUS_NOT_IMPLEMENTED;
-    //    TraceInformation("SetFeature: FWK_ARGB_CONTROL_CODE_DUMMY1\n");
-    //    break;
-
-    //case FWK_ARGB_CONTROL_CODE_DUMMY2:
-    //    status = STATUS_NOT_IMPLEMENTED;
-    //    TraceInformation("SetFeature: FWK_ARGB_CONTROL_CODE_DUMMY2\n");
-    //    break;
-
-    //default:
-    //    status = STATUS_NOT_IMPLEMENTED;
-    //    TraceInformation("SetFeature: Unknown control Code 0x%x\n",
-    //        controlInfo->ControlCode);
-    //    break;
-    //}
 
     WdfRequestSetInformation(Request, reportSize);
     return status;
@@ -890,9 +793,10 @@ Return Value:
     NTSTATUS                status;
     HID_XFER_PACKET         packet;
     ULONG                   reportSize;
-    PFWK_ARGB_INPUT_REPORT   reportBuffer;
 
     TraceInformation("%!FUNC! Entry");
+
+    UNREFERENCED_PARAMETER(QueueContext);
 
     status = RequestGetHidXferPacket_ToReadFromDevice(
         Request,
@@ -901,28 +805,9 @@ Return Value:
         return status;
     }
 
-    if (packet.reportId != CONTROL_COLLECTION_REPORT_ID) {
-        //
-        // If collection ID is not for control collection then handle
-        // this request just as you would for a regular collection.
-        //
-        status = STATUS_INVALID_PARAMETER;
-        TraceError("GetInputReport: invalid report id %d\n", packet.reportId);
-        return status;
-    }
-
-    reportSize = sizeof(FWK_ARGB_INPUT_REPORT);
-    if (packet.reportBufferLen < reportSize) {
-        status = STATUS_INVALID_BUFFER_SIZE;
-        TraceError("GetInputReport: output buffer too small. Size %d, expect %d\n",
-            packet.reportBufferLen, reportSize);
-        return status;
-    }
-
-    reportBuffer = (PFWK_ARGB_INPUT_REPORT)(packet.reportBuffer);
-
-    reportBuffer->ReportId = CONTROL_COLLECTION_REPORT_ID;
-    reportBuffer->Data = QueueContext->OutputReport;
+    TraceError("GetInputReport: with ReportID %d and size: %d\n", packet.reportId, packet.reportBufferLen);
+    status = STATUS_INVALID_PARAMETER;
+    reportSize = 0;
 
     //
     // Report how many bytes were copied
@@ -958,9 +843,10 @@ Return Value:
     NTSTATUS                status;
     HID_XFER_PACKET         packet;
     ULONG                   reportSize;
-    PFWK_ARGB_OUTPUT_REPORT  reportBuffer;
 
     TraceInformation("%!FUNC! Entry");
+
+    UNREFERENCED_PARAMETER(QueueContext);
 
     status = RequestGetHidXferPacket_ToWriteToDevice(
         Request,
@@ -969,31 +855,9 @@ Return Value:
         return status;
     }
 
-    if (packet.reportId != CONTROL_COLLECTION_REPORT_ID) {
-        //
-        // If collection ID is not for control collection then handle
-        // this request just as you would for a regular collection.
-        //
-        status = STATUS_INVALID_PARAMETER;
-        TraceError("SetOutputReport: unkown report id %d\n", packet.reportId);
-        return status;
-    }
-
-    //
-    // before touching buffer make sure buffer is big enough.
-    //
-    reportSize = sizeof(FWK_ARGB_OUTPUT_REPORT);
-
-    if (packet.reportBufferLen < reportSize) {
-        status = STATUS_INVALID_BUFFER_SIZE;
-        TraceError("SetOutputReport: invalid input buffer. size %d, expect %d\n",
-            packet.reportBufferLen, reportSize);
-        return status;
-    }
-
-    reportBuffer = (PFWK_ARGB_OUTPUT_REPORT)packet.reportBuffer;
-
-    QueueContext->OutputReport = reportBuffer->Data;
+    TraceError("GetInputReport: with ReportID %d and size: %d\n", packet.reportId, packet.reportBufferLen);
+    status = STATUS_INVALID_PARAMETER;
+    reportSize = 0;
 
     //
     // Report how many bytes were copied
@@ -1126,7 +990,6 @@ Return Value:
     WDFQUEUE                queue;
     PMANUAL_QUEUE_CONTEXT   queueContext;
     WDFREQUEST              request;
-    FWK_ARGB_INPUT_REPORT    readReport;
 
     TraceInformation("%!FUNC! Entry");
 
@@ -1151,12 +1014,7 @@ Return Value:
         return;
 	}
 
-    readReport.ReportId = CONTROL_FEATURE_REPORT_ID;
-    readReport.Data = queueContext->DeviceContext->DeviceData;
-
-    status = RequestCopyFromBuffer(request,
-        &readReport,
-        sizeof(readReport));
+    TraceInformation("Has request in manual queue\n");
 
     WdfRequestComplete(request, status);
 }
