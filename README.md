@@ -41,7 +41,9 @@ By default the driver loads with an 8 LED configuration arranged in a circle of
 Framework Desktop.
 
 To customize the configuration, set/edit the following registry entries.
-They are all under: `TBD`
+They are all under: `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Enum\ROOT\HIDCLASS\0000\Device Parameters`
+
+This configuration must be done after the driver is installed, then you disable the device, set the registry entries and then re-enable the device.
 
 | Name             | Type  | Explanation                     |
 |------------------|-------|---------------------------------|
@@ -55,6 +57,14 @@ LedArrangement can have the following values:
 - 1: Circular, single layer
 - 2: Linear (e.g. LED strip)
 - 3: Square Matrix (works best with a square number of LEDs)
+
+For example to control just 4 LEDs on the fan:
+
+```
+sudo reg add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Enum\ROOT\HIDCLASS\0000\Device Parameters" /v ReadFromRegistry /t REG_DWORD /d 1
+sudo reg add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Enum\ROOT\HIDCLASS\0000\Device Parameters" /v LedCount /t REG_DWORD /d 4
+sudo reg add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Enum\ROOT\HIDCLASS\0000\Device Parameters" /v LedArrangement /t REG_DWORD /d 0
+```
 
 ## Development
 

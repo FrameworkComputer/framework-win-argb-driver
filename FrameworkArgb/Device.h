@@ -48,7 +48,9 @@ typedef struct _DEVICE_CONTEXT
     HANDLE                  CrosEcHandle;
     UINT16                  CurrentLampId;
 	BOOLEAN  		        AutonomousMode;
-    UINT8                   LampCount;
+    UINT16                  LampCount;
+    UINT32                  Width;
+    UINT32                  Height;
     Position                LampPositions[MAX_LAMPARRAY_LAMP_COUNT];
     HID_DESCRIPTOR          HidDescriptor;
     PHID_REPORT_DESCRIPTOR  ReportDescriptor;
@@ -175,7 +177,7 @@ CheckRegistryForLedConfig(
 
 NTSTATUS
 ReadLedConfigFromRegistry(
-    _In_  WDFDEVICE Device
+    _In_  WDFDEVICE Device,
     _Out_ UINT8 *LampCount,
     _Out_ UINT8 *LedArrangement
 );
