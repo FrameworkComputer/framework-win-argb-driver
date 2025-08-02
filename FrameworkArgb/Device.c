@@ -204,20 +204,20 @@ HID_DESCRIPTOR              G_DefaultHidDescriptor = {
 NTSTATUS
 CalculateLampPositions(
     Position *LampPositions,
-    UINT8 LedCount,
+    UINT8 LampCount,
     UINT8 LedArrangement
 )
 {
     UINT8 Layers = 0;
-    if (LedCount > MAX_LAMPARRAY_LAMP_COUNT) {
-        TraceError("LedCount %d over %d", LedCount, MAX_LAMPARRAY_LAMP_COUNT);
+    if (LampCount > MAX_LAMPARRAY_LAMP_COUNT) {
+        TraceError("LampCount %d over %d", LampCount, MAX_LAMPARRAY_LAMP_COUNT);
         return STATUS_INVALID_PARAMETER;
     }
 
     switch (LedArrangement) {
     // Circular, layers of 8
     case 0:
-        for (UINT8 i = 0; i <= LedCount / 8; i++) {
+        for (UINT8 i = 0; i <= LampCount / 8; i++) {
             // 8 LEDs in a circle
             // z is 0 for all LEDs, they're all in the same plane
             // Bottom LED
@@ -244,7 +244,7 @@ CalculateLampPositions(
         break;
     // Circular, single layer, even distance from each other
     case 1:
-        for (UINT8 i = 0; i <= LedCount; i++) {
+        for (UINT8 i = 0; i <= LampCount; i++) {
             // TODO
             LampPositions[i].x = 0;
             LampPositions[i].y = 0;
@@ -252,15 +252,15 @@ CalculateLampPositions(
         break;
     // Linear, LED strip with 5mm distance
     case 2:
-        for (UINT8 i = 0; i <= LedCount / 8; i++) {
+        for (UINT8 i = 0; i <= LampCount / 8; i++) {
             LampPositions[i].x = i * 5000;
             LampPositions[i].y = 0;
         }
         break;
     // Square Matrix with 5mm distance
     case 3:
-        Layers = (UINT8) sqrt((double) LedCount);
-        for (UINT8 i = 0; i <= LedCount; i++) {
+        Layers = (UINT8) sqrt((double) LampCount);
+        for (UINT8 i = 0; i <= LampCount; i++) {
             LampPositions[i].x = (i % Layers) * 5000;
             LampPositions[i].y = (i / Layers) * 5000;
         }
@@ -300,7 +300,7 @@ Return Value:
     PHID_DEVICE_ATTRIBUTES  hidAttributes;
     WDFDEVICE               device;
     NTSTATUS                status;
-    UINT8                   LedCount;
+    UINT8                   LampCount;
     UINT8                   LedArrangement;
 
     TraceInformation("%!FUNC! Entry");
@@ -338,25 +338,25 @@ Return Value:
     deviceContext->AutonomousMode = TRUE;
 
     status = CheckRegistryForLedConfig(device);
-    deviceContext->LedCount = 0;
+    deviceContext->LampCount = 0;
     if (NT_SUCCESS(status)) {
         //
         // We need to read read descriptor from registry
         //
-        status = ReadLedConfigFromRegistry(device, &LedCount, &LedArrangement);
+        status = ReadLedConfigFromRegistry(device, &LampCount, &LedArrangement);
         if (!NT_SUCCESS(status)) {
             TraceError("Failed to read descriptor from registry\n");
         }
     }
 
-    status = CalculateLampPositions(&deviceContext->LampPositions, deviceContext->LedCount, LedArrangement);
+    status = CalculateLampPositions(&deviceContext->LampPositions[0], deviceContext->LampCount, LedArrangement);
     if (!NT_SUCCESS(status)) {
-        deviceContext->LedCount = 0;
+        deviceContext->LampCount = 0;
     }
 
     // Default 8 LED fan
-    if (deviceContext->LedCount == 0) {
-        deviceContext->LedCount = 8;
+    if (deviceContext->LampCount == 0) {
+        deviceContext->LampCount = 8;
         LedArrangement = 0;
     }
 
@@ -657,7 +657,7 @@ Return Value:
 NTSTATUS
 ReadLedConfigFromRegistry(
     WDFDEVICE Device,
-    UINT8 *LedCount,
+    UINT8 *LampCount,
     UINT8 *LedArrangement
 )
 /*++
@@ -679,11 +679,10 @@ Return Value:
     WDFKEY          hKey = NULL;
     NTSTATUS        status;
     UNICODE_STRING  valueName;
-    WDFMEMORY       memory;
     size_t          bufferSize;
     PVOID           reportDescriptor;
     PDEVICE_CONTEXT deviceContext;
-    WDF_OBJECT_ATTRIBUTES   attributes;
+    ULONG           value;
 
     deviceContext = GetDeviceContext(Device);
 
@@ -693,35 +692,27 @@ Return Value:
         WDF_NO_OBJECT_ATTRIBUTES,
         &hKey);
 
-    if (NT_SUCCESS(status)) {
-
-        RtlInitUnicodeString(&valueName, L"MyReportDescriptor");
-
-        WDF_OBJECT_ATTRIBUTES_INIT(&attributes);
-        attributes.ParentObject = Device;
-
-        status = WdfRegistryQueryMemory(hKey,
-            &valueName,
-            NonPagedPool,
-            &attributes,
-            &memory,
-            NULL);
-
-        if (NT_SUCCESS(status)) {
-
-            reportDescriptor = WdfMemoryGetBuffer(memory, &bufferSize);
-
-            TraceInformation("No. of report descriptor bytes copied: %d\n", (INT)bufferSize);
-
-            //
-            // Store the registry report descriptor in the device extension
-            //
-            deviceContext->ReportDescriptor = reportDescriptor;
-            deviceContext->HidDescriptor.DescriptorList[0].wReportLength = (USHORT)bufferSize;
-        }
-
-        WdfRegistryClose(hKey);
+    if (!NT_SUCCESS(status)) {
+	    return status;
     }
+
+    RtlInitUnicodeString(&valueName, L"LedCount");
+    status = RtlInitUnicodeString(hKey, &valueName, value);
+    if (!NT_SUCCESS(status)) {
+        WdfRegistryClose(hKey);
+        return status;
+    }
+    *LampCount = (UINT8) value;
+
+    RtlInitUnicodeString(&valueName, L"LedArrangement");
+    status = RtlInitUnicodeString(hKey, &valueName, value);
+    if (!NT_SUCCESS(status)) {
+        WdfRegistryClose(hKey);
+        return status;
+    }
+    *LedArrangement = (UINT8) value;
+
+    WdfRegistryClose(hKey);
 
     return status;
 }

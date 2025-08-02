@@ -175,7 +175,9 @@ CheckRegistryForLedConfig(
 
 NTSTATUS
 ReadLedConfigFromRegistry(
-    _In_ WDFDEVICE Device
+    _In_  WDFDEVICE Device
+    _Out_ UINT8 *LampCount,
+    _Out_ UINT8 *LedArrangement
 );
 
 //
