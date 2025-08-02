@@ -29,6 +29,32 @@ References:
   - [Windows.Devices.Enumeration](https://learn.microsoft.com/en-us/uwp/api/windows.devices.enumeration.devicewatcher?view=winrt-26100)
 - [Game Dev Documentation](https://learn.microsoft.com/en-us/gaming/gdk/docs/features/common/lighting/gc-lighting-toc)
 
+## Configuration
+
+When the driver loads, the Windows Dynamic Lighting interface (or any HID
+application) asks it about the LED configuration - how many and where in 3D
+space.
+This is so that they can know how to apply 2D or 3D animations to them.
+
+By default the driver loads with an 8 LED configuration arranged in a circle of
+20mm diameter. This matches the ARGB fan that Framework offers for the
+Framework Desktop.
+
+To customize the configuration, set/edit the following registry entries.
+They are all under: `TBD`
+
+| Name             | Type  | Explanation                     |
+| ReadFromRegistry | DWORD | If 1, the other values are read |
+| LedCount         | DWORD | How many LEDs in total          |
+| LedArrangement   | DWORD | How the LEDs are arranged       |
+
+LedArrangement can have the following values:
+
+- 0: Circular, layers of 8 (e.g. when 16 LEDs in total, two layers of 8 LEDs)
+- 1: Circular, single layer
+- 2: Linear (e.g. LED strip)
+- 3: Square Matrix (works best with a square number of LEDs)
+
 ## Development
 
 ### Build

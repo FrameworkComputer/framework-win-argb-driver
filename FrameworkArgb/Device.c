@@ -261,6 +261,9 @@ Return Value:
     deviceContext->Device = device;
     deviceContext->CurrentLampId = 0;
     deviceContext->AutonomousMode = TRUE;
+
+    // zoid
+
     // 8 LEDs in a circle
     // z is 0 for all LEDs, they're all in the same plane
     // Bottom LED
@@ -524,5 +527,126 @@ Return Value:
     }
 
     status = RequestCopyFromBuffer(Request, string, stringSizeCb);
+    return status;
+}
+
+NTSTATUS
+CheckRegistryForDescriptor(
+    WDFDEVICE Device
+)
+/*++
+
+Routine Description:
+
+    Read "ReadFromRegistry" key value from device parameters in the registry.
+
+Arguments:
+
+    device - pointer to a device object.
+
+Return Value:
+
+    NT status code.
+
+--*/
+
+{
+    WDFKEY          hKey = NULL;
+    NTSTATUS        status;
+    UNICODE_STRING  valueName;
+    ULONG           value;
+
+    status = WdfDeviceOpenRegistryKey(Device,
+        PLUGPLAY_REGKEY_DEVICE,
+        KEY_READ,
+        WDF_NO_OBJECT_ATTRIBUTES,
+        &hKey);
+    if (NT_SUCCESS(status)) {
+
+        RtlInitUnicodeString(&valueName, L"ReadFromRegistry");
+
+        status = WdfRegistryQueryULong(hKey,
+            &valueName,
+            &value);
+
+        if (NT_SUCCESS(status)) {
+            if (value == 0) {
+                status = STATUS_UNSUCCESSFUL;
+            }
+        }
+
+        WdfRegistryClose(hKey);
+    }
+
+    return status;
+}
+
+NTSTATUS
+ReadDescriptorFromRegistry(
+    WDFDEVICE Device
+)
+/*++
+
+Routine Description:
+
+    Read HID report descriptor from registry
+
+Arguments:
+
+    device - pointer to a device object.
+
+Return Value:
+
+    NT status code.
+
+--*/
+{
+    WDFKEY          hKey = NULL;
+    NTSTATUS        status;
+    UNICODE_STRING  valueName;
+    WDFMEMORY       memory;
+    size_t          bufferSize;
+    PVOID           reportDescriptor;
+    PDEVICE_CONTEXT deviceContext;
+    WDF_OBJECT_ATTRIBUTES   attributes;
+
+    deviceContext = GetDeviceContext(Device);
+
+    status = WdfDeviceOpenRegistryKey(Device,
+        PLUGPLAY_REGKEY_DEVICE,
+        KEY_READ,
+        WDF_NO_OBJECT_ATTRIBUTES,
+        &hKey);
+
+    if (NT_SUCCESS(status)) {
+
+        RtlInitUnicodeString(&valueName, L"MyReportDescriptor");
+
+        WDF_OBJECT_ATTRIBUTES_INIT(&attributes);
+        attributes.ParentObject = Device;
+
+        status = WdfRegistryQueryMemory(hKey,
+            &valueName,
+            NonPagedPool,
+            &attributes,
+            &memory,
+            NULL);
+
+        if (NT_SUCCESS(status)) {
+
+            reportDescriptor = WdfMemoryGetBuffer(memory, &bufferSize);
+
+            KdPrint(("No. of report descriptor bytes copied: %d\n", (INT)bufferSize));
+
+            //
+            // Store the registry report descriptor in the device extension
+            //
+            deviceContext->ReportDescriptor = reportDescriptor;
+            deviceContext->HidDescriptor.DescriptorList[0].wReportLength = (USHORT)bufferSize;
+        }
+
+        WdfRegistryClose(hKey);
+    }
+
     return status;
 }

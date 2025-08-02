@@ -51,7 +51,7 @@ typedef struct _DEVICE_CONTEXT
     Position                LampPositions[LAMPARRAY_LAMP_COUNT];
     HID_DESCRIPTOR          HidDescriptor;
     PHID_REPORT_DESCRIPTOR  ReportDescriptor;
-    BOOLEAN                 ReadReportDescFromRegistry;
+    BOOLEAN                 ReadLedConfigFromRegistry;
 } DEVICE_CONTEXT, * PDEVICE_CONTEXT;
 
 //
@@ -168,6 +168,15 @@ RequestGetHidXferPacket_ToWriteToDevice(
     _Out_ HID_XFER_PACKET* Packet
 );
 
+NTSTATUS
+CheckRegistryForLedConfig(
+    _In_ WDFDEVICE Device
+);
+
+NTSTATUS
+ReadLedConfigFromRegistry(
+    _In_ WDFDEVICE Device
+);
 
 //
 // Misc definitions
