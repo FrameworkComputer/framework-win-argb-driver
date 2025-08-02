@@ -221,49 +221,48 @@ CalculateLampPositions(
             // 8 LEDs in a circle
             // z is 0 for all LEDs, they're all in the same plane
             // Bottom LED
-            deviceContext->LampPositions[i+0].x = 40000;
-            deviceContext->LampPositions[i+0].y = 0;
-            deviceContext->LampPositions[i+1].x = 60000;
-            deviceContext->LampPositions[i+1].y = 20000;
+            LampPositions[i+0].x = 40000;
+            LampPositions[i+0].y = 0;
+            LampPositions[i+1].x = 60000;
+            LampPositions[i+1].y = 20000;
             // Right LED
-            deviceContext->LampPositions[i+2].x = 80000;
-            deviceContext->LampPositions[i+2].y = 40000;
-            deviceContext->LampPositions[i+3].x = 60000;
-            deviceContext->LampPositions[i+3].y = 60000;
+            LampPositions[i+2].x = 80000;
+            LampPositions[i+2].y = 40000;
+            LampPositions[i+3].x = 60000;
+            LampPositions[i+3].y = 60000;
             // Top LED
-            deviceContext->LampPositions[i+4].x = 40000;
-            deviceContext->LampPositions[i+4].y = 80000;
-            deviceContext->LampPositions[i+5].x = 20000;
-            deviceContext->LampPositions[i+5].y = 60000;
+            LampPositions[i+4].x = 40000;
+            LampPositions[i+4].y = 80000;
+            LampPositions[i+5].x = 20000;
+            LampPositions[i+5].y = 60000;
             // Left LED
-            deviceContext->LampPositions[i+6].x = 0;
-            deviceContext->LampPositions[i+6].y = 40000;
-            deviceContext->LampPositions[i+7].x = 20000;
-            deviceContext->LampPositions[i+7].y = 20000;
+            LampPositions[i+6].x = 0;
+            LampPositions[i+6].y = 40000;
+            LampPositions[i+7].x = 20000;
+            LampPositions[i+7].y = 20000;
         }
         break;
     // Circular, single layer, even distance from each other
     case 1:
         for (UINT8 i = 0; i <= LedCount; i++) {
             // TODO
-            deviceContext->LampPositions[i].x = 0;
-            deviceContext->LampPositions[i].y = 0;
+            LampPositions[i].x = 0;
+            LampPositions[i].y = 0;
         }
         break;
     // Linear, LED strip with 5mm distance
     case 2:
         for (UINT8 i = 0; i <= LedCount / 8; i++) {
-            deviceContext->LampPositions[i].x = i * 5000;
-            deviceContext->LampPositions[i].y = 0;
+            LampPositions[i].x = i * 5000;
+            LampPositions[i].y = 0;
         }
         break;
-    }
     // Square Matrix with 5mm distance
     case 3:
         Layers = (UINT8) sqrt((double) LedCount);
         for (UINT8 i = 0; i <= LedCount; i++) {
-            deviceContext->LampPositions[i].x = (i % Layers) * 5000;
-            deviceContext->LampPositions[i].y = (i / Layers) * 5000;
+            LampPositions[i].x = (i % Layers) * 5000;
+            LampPositions[i].y = (i / Layers) * 5000;
         }
         break;
     default:
