@@ -28,10 +28,10 @@ DRIVER_INITIALIZE                   DriverEntry;
 EVT_WDF_DRIVER_DEVICE_ADD           EvtDeviceAdd;
 EVT_WDF_TIMER                       EvtTimerFunc;
 
-#define LAMPARRAY_LAMP_COUNT        8
-#define LAMPARRAY_WIDTH             80000   // 80mm
-#define LAMPARRAY_HEIGHT            80000   // 80mm
-#define LAMPARRAY_DEPTH             20000   // 20mm
+#define MAX_LAMPARRAY_LAMP_COUNT    256
+//#define LAMPARRAY_WIDTH             80000   // 80mm
+//#define LAMPARRAY_HEIGHT            80000   // 80mm
+//#define LAMPARRAY_DEPTH             20000   // 20mm
 #define LAMPARRAY_KIND              0x07    // LampArrayKindChassis
 #define LAMPARRAY_UPDATE_INTERVAL   100000  // 10ms
 
@@ -48,10 +48,13 @@ typedef struct _DEVICE_CONTEXT
     HANDLE                  CrosEcHandle;
     UINT16                  CurrentLampId;
 	BOOLEAN  		        AutonomousMode;
-    Position                LampPositions[LAMPARRAY_LAMP_COUNT];
+    UINT16                  LampCount;
+    UINT32                  Width;
+    UINT32                  Height;
+    UINT32                  Depth;
+    Position                LampPositions[MAX_LAMPARRAY_LAMP_COUNT];
     HID_DESCRIPTOR          HidDescriptor;
     PHID_REPORT_DESCRIPTOR  ReportDescriptor;
-    BOOLEAN                 ReadReportDescFromRegistry;
 } DEVICE_CONTEXT, * PDEVICE_CONTEXT;
 
 //
@@ -168,6 +171,17 @@ RequestGetHidXferPacket_ToWriteToDevice(
     _Out_ HID_XFER_PACKET* Packet
 );
 
+NTSTATUS
+CheckRegistryForLedConfig(
+    _In_ WDFDEVICE Device
+);
+
+NTSTATUS
+ReadLedConfigFromRegistry(
+    _In_  WDFDEVICE Device,
+    _Out_ UINT16 *LampCount,
+    _Out_ UINT8 *LedArrangement
+);
 
 //
 // Misc definitions
