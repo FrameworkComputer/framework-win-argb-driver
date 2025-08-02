@@ -44,6 +44,7 @@ To customize the configuration, set/edit the following registry entries.
 They are all under: `TBD`
 
 | Name             | Type  | Explanation                     |
+|------------------|-------|---------------------------------|
 | ReadFromRegistry | DWORD | If 1, the other values are read |
 | LedCount         | DWORD | How many LEDs in total          |
 | LedArrangement   | DWORD | How the LEDs are arranged       |

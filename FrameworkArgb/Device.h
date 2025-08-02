@@ -28,7 +28,7 @@ DRIVER_INITIALIZE                   DriverEntry;
 EVT_WDF_DRIVER_DEVICE_ADD           EvtDeviceAdd;
 EVT_WDF_TIMER                       EvtTimerFunc;
 
-#define LAMPARRAY_LAMP_COUNT        8
+#define MAX_LAMPARRAY_LAMP_COUNT    256
 #define LAMPARRAY_WIDTH             80000   // 80mm
 #define LAMPARRAY_HEIGHT            80000   // 80mm
 #define LAMPARRAY_DEPTH             20000   // 20mm
@@ -48,10 +48,10 @@ typedef struct _DEVICE_CONTEXT
     HANDLE                  CrosEcHandle;
     UINT16                  CurrentLampId;
 	BOOLEAN  		        AutonomousMode;
-    Position                LampPositions[LAMPARRAY_LAMP_COUNT];
+    UINT8                   LampCount;
+    Position                LampPositions[MAX_LAMPARRAY_LAMP_COUNT];
     HID_DESCRIPTOR          HidDescriptor;
     PHID_REPORT_DESCRIPTOR  ReportDescriptor;
-    BOOLEAN                 ReadLedConfigFromRegistry;
 } DEVICE_CONTEXT, * PDEVICE_CONTEXT;
 
 //
