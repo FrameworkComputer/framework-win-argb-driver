@@ -10,7 +10,7 @@
 ;    INF file for installing HID minidriver (UMDF 2 version)
 ;
 ; Installation Notes:
-;    Using Devcon: Type "devcon install FrameworkArgb.inf root\FrameworkArgb" to install
+;    Using pnputil: Type "sudo pnputil /add-driver FrameworkArgb.inf /install" to install
 ;
 ; Important:
 ;    This INF depends on MsHidUmdf.inf, which was introduced in build 22000
@@ -40,7 +40,7 @@ FrameworkArgb.dll = 1
 %ManufacturerName% = Standard,NT$ARCH$.10.0...22000 ; wudfrd.inf introduced in build 22000
 
 [Standard.NT$ARCH$.10.0...22000]
-%DeviceName% = FrameworkArgb, Root\FrameworkArgb ; TODO: edit hw-id
+%DeviceName% = FrameworkArgb, ACPI\FRMW0006
 
 
 ; =================== UMDF Device ==================================

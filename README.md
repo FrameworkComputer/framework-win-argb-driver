@@ -41,7 +41,7 @@ By default the driver loads with an 8 LED configuration arranged in a circle of
 Framework Desktop.
 
 To customize the configuration, set/edit the following registry entries.
-They are all under: `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Enum\ROOT\HIDCLASS\0000\Device Parameters`
+They are all under: `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Enum\ACPI\FRMW0006\?\Device Parameters`
 
 This configuration must be done after the driver is installed, then you disable the device, set the registry entries and then re-enable the device.
 
@@ -79,10 +79,6 @@ Use Visual Studio 2022 Community Edition and build the project.
 ### Install
 
 ```
-# Software device right now
-cp "C:\Program Files (x86)\Windows Kits\10\Tools\10.0.26100.0\x64\devcon.exe" .
-sudo .\devcon install .\FrameworkArgb\x64\Debug\FrameworkArgb\FrameworkArgb.inf root\FrameworkArgb
-
 # Soon with ACPI device in updated BIOS
 sudo pnputil /add-driver .\FrameworkArgb\x64\Debug\FrameworkArgb\FrameworkArgb.inf /install
 ```
