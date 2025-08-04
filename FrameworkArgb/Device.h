@@ -196,16 +196,6 @@ ReadLedConfigFromRegistry(
 #define FWK_ARGB_HID_PID        0x0033
 #define FWK_ARGB_HID_VERSION    0x0100
 
-//
-// Custom control codes are defined here. They are to be used for sideband
-// communication with the hid minidriver. These control codes are sent to
-// the hid minidriver using Hid_SetFeature() API to a custom collection
-// defined especially to handle such requests.
-//
-#define  FWK_ARGB_CONTROL_CODE_SET_ATTRIBUTES              0x00
-#define  FWK_ARGB_CONTROL_CODE_DUMMY1                      0x01
-#define  FWK_ARGB_CONTROL_CODE_DUMMY2                      0x02
-
 #define LAMP_ARRAY_ATTRIBUTES_REPORT_ID    0x01
 #define LAMP_ATTRIBUTES_REQUEST_REPORT_ID  0x02
 #define LAMP_ATTRIBUTES_RESPONSE_REPORT_ID 0x03
