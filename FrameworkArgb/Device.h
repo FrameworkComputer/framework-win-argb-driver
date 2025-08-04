@@ -180,7 +180,7 @@ RequestGetHidXferPacket_ToWriteToDevice(
 //
 #define FWK_ARGB_HID_VID        0x32AC
 #define FWK_ARGB_HID_PID        0x0033
-#define FWK_ARGB_HID_VERSION    0x0101
+#define FWK_ARGB_HID_VERSION    0x0100
 
 //
 // Custom control codes are defined here. They are to be used for sideband
@@ -202,9 +202,10 @@ RequestGetHidXferPacket_ToWriteToDevice(
 
 #define MAXIMUM_STRING_LENGTH           (126 * sizeof(WCHAR))
 #define FWK_ARGB_MANUFACTURER_STRING    L"Framework"
-#define FWK_ARGB_PRODUCT_STRING         L"Desktop UMDF ARGB Driver"
-#define FWK_ARGB_SERIAL_NUMBER_STRING   L"FRAMPBCP00"
-#define FWK_ARGB_DEVICE_STRING          L"Desktop UMDF ARGB Device"
+#define FWK_ARGB_PRODUCT_STRING         L"Desktop ARGB Driver"
+// Same as Framework Desktop AMD Ryzen AI 300 Outer Box
+#define FWK_ARGB_SERIAL_NUMBER_STRING   L"FRAMPB000000000000"
+#define FWK_ARGB_DEVICE_STRING          L"Desktop ARGB Device"
 #define FWK_ARGB_DEVICE_STRING_INDEX    5
 
 //

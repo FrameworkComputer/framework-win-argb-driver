@@ -88,8 +88,6 @@ FrameworkArgb.dll
 ; =================== Generic ==================================
 
 [Strings]
-ManufacturerName="Framework Computer Inc"
-DiskName = "FrameworkArgb Installation Disk"
-DeviceName ="FrameworkArgb Device"
-ClassName          ="Sample Device"
-WudfRdDisplayName  ="Windows Driver Foundation - User-mode Driver Framework Reflector"
+ManufacturerName="Framework Computer"
+DiskName = "Framework Desktop ARGB Installation Disk"
+DeviceName ="Framework Desktop ARGB Device"
