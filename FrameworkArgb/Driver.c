@@ -62,6 +62,7 @@ Return Value:
 #endif
 
     TraceInformation("%!FUNC! Entry");
+    // TODO: Print Registry path
 
     //
     // Register a cleanup callback so that we can call WPP_CLEANUP when
@@ -74,6 +75,9 @@ Return Value:
                            FrameworkArgbEvtDeviceAdd
                            );
 
+    // AppVerifier shows the following errors
+    // Could not convert Key security descriptor &apos;\REGISTRY\MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\WUDF\Services\FrameworkArgb&apos; to text due to error 0x8
+    // RegOpenKeyExW: Key (\REGISTRY\MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\WUDF\Services\FrameworkArgb\Parameters\Wdf) is denied &apos;READ_CONTROL KEY_QUERY_VALUE KEY_ENUMERATE_SUB_KEYS KEY_NOTIFY&apos; access with error 0x2
     status = WdfDriverCreate(DriverObject,
                              RegistryPath,
                              &attributes,

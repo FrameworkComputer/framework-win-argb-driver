@@ -639,6 +639,9 @@ Return Value:
     ULONG           value;
 
     TraceInformation("%!FUNC! Entry");
+    //
+    // If this fails, AppVerifier shows an error
+    // RegOpenKeyExW: Key (\REGISTRY\MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\WUDF\Services\WUDFx02000) is denied &apos;READ_CONTROL KEY_QUERY_VALUE KEY_ENUMERATE_SUB_KEYS KEY_NOTIFY&apos; access with error 0x2
     status = WdfDeviceOpenRegistryKey(Device,
         PLUGPLAY_REGKEY_DEVICE,
         KEY_READ,
