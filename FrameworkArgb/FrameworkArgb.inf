@@ -89,5 +89,5 @@ FrameworkArgb.dll
 
 [Strings]
 ManufacturerName="Framework Computer"
-DiskName = "Framework Desktop ARGB Installation Disk"
-DeviceName ="Framework Desktop ARGB Device"
+DiskName = "Framework ARGB Installation Disk"
+DeviceName ="Framework ARGB Device"

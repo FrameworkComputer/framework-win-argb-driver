@@ -202,10 +202,9 @@ RequestGetHidXferPacket_ToWriteToDevice(
 
 #define MAXIMUM_STRING_LENGTH           (126 * sizeof(WCHAR))
 #define FWK_ARGB_MANUFACTURER_STRING    L"Framework"
-#define FWK_ARGB_PRODUCT_STRING         L"Desktop ARGB Driver"
-// Same as Framework Desktop AMD Ryzen AI 300 Outer Box
-#define FWK_ARGB_SERIAL_NUMBER_STRING   L"FRAMPB000000000000"
-#define FWK_ARGB_DEVICE_STRING          L"Desktop ARGB Device"
+#define FWK_ARGB_PRODUCT_STRING         L"ARGB Driver"
+#define FWK_ARGB_SERIAL_NUMBER_STRING   L""
+#define FWK_ARGB_DEVICE_STRING          L"ARGB Device"
 #define FWK_ARGB_DEVICE_STRING_INDEX    5
 
 //
