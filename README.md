@@ -49,3 +49,13 @@ sudo .\devcon install .\FrameworkArgb\x64\Debug\FrameworkArgb\FrameworkArgb.inf 
 # Soon with ACPI device in updated BIOS
 sudo pnputil /add-driver .\FrameworkArgb\x64\Debug\FrameworkArgb\FrameworkArgb.inf /install
 ```
+
+### Logging
+
+Logs can be captured and viewed by
+[TraceView](https://learn.microsoft.com/en-us/windows-hardware/drivers/devtest/traceview).
+
+You can install it from the Windows SDK, launch as Admin and load
+`FrameworkArgb.pdb`.
+
+To see logs from the EC driver, do the same with `crosecbus.pdb`.
