@@ -23,3 +23,24 @@ jobs:
         env:
           Configuration: ${{ matrix.configuration }}
           Platform: ${{ matrix.platform }}
+
+      # Need to EV sign and replace existing signatures
+      # java -jar ~/Downloads/jsign-7.1.jar --replace --storetype PIV --storepass ****** --tsaurl http://ts.ssl.com --tsmode RFC3161 \
+      #   FrameworkArgb.dll
+      # java -jar ~/Downloads/jsign-7.1.jar --replace --storetype PIV --storepass ****** --tsaurl http://ts.ssl.com --tsmode RFC3161 \
+      #   frameworkargb.cat
+      - name: Create bundle
+        run: |
+          mkdir bundle
+          cp FrameworkArgb\install\devcon.exe bundle\
+          cp FrameworkArgb\install\install_argb_driver.bat bundle\
+          cp FrameworkArgb\x64\${{ matrix.configuration }}\FrameworkArgb\frameworkargb.cat bundle\
+          cp FrameworkArgb\x64\${{ matrix.configuration }}\FrameworkArgb\FrameworkArgb.dll bundle\
+          cp FrameworkArgb\x64\${{ matrix.configuration }}\FrameworkArgb\FrameworkArgb.inf bundle\
+          cp FrameworkArgb\x64\${{ matrix.configuration }}\FrameworkArgb.pdb bundle\
+
+      - name: Upload bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: framework_win_argb_${{ matrix.configuration }}
+          path: bundle
