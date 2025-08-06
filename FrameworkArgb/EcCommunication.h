@@ -1,5 +1,7 @@
 /*++
 
+SPDX-License-Identifier: MS-PL
+
 Copyright (C) Framework Computer Inc, All Rights Reserved.
 Copyright (C) 2014 The ChromiumOS Authors
 
