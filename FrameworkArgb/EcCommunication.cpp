@@ -104,7 +104,7 @@ int CrosEcSendCommand(
             TraceError("%!FUNC! inlen is %d. But indata is NULL", inlen);
             return 0;
         }
-        RtlCopyMemory(cmd.data, indata, inlen);
+        RtlCopyMemory(indata, cmd.data, inlen);
     }
 
     return cmd.inlen;
