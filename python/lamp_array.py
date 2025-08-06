@@ -31,13 +31,9 @@ def print_lamp_details(device):
     array_attributes = h.get_feature_report(LAMP_ARRAY_ATTRIBUTES_REPORT_ID, 0x100)
     # Cut off report ID in first byte and convert to bytearray
     array_attributes = bytes(array_attributes[1:])
-    print(array_attributes.hex())
-    print(len(array_attributes))
 
     (cnt, width, height, depth, kind, interval) = \
             struct.unpack(LAMP_ARRAY_ATTRIBUTES_FORMAT, array_attributes)
-
-    print(interval)
 
     print("Lamp Array")
     print(f"  Count:               {cnt}")
@@ -81,12 +77,22 @@ def print_lamp_details(device):
 
 
 def main():
-    devices = find_devs(show=False, verbose=False)
+    verbose = False
+    devices = find_devs(show=False, verbose=verbose)
     for device in devices:
-        positions = print_lamp_details(device)
-        import matplotlib.pyplot as plt
-        plt.scatter(x=positions[0], y=positions[1])
-        plt.show()
+        try:
+            positions = print_lamp_details(device)
+            import matplotlib.pyplot as plt
+            plt.scatter(x=positions[0], y=positions[1])
+            plt.show()
+        except struct.error as e:
+            if verbose:
+                print(e)
+            continue
+        except OSError as e:
+            if verbose:
+                print(e)
+            continue
 
 def format_bcd(fw_ver):
     fw_ver_major = (fw_ver & 0xFF00) >> 8
