@@ -294,8 +294,8 @@ Return Value:
     deviceContext->CrosEcHandle = INVALID_HANDLE_VALUE;
     status = ConnectToEc(&deviceContext->CrosEcHandle);
     if (!NT_SUCCESS(status)) {
-        TraceError("COMBO %!FUNC! ConnectToEc failed %!STATUS!", status);
-        return status;
+        TraceError("%!FUNC! ConnectToEc failed %!STATUS!", status);
+        // Don't fail here, if the EC driver is not available when this driver loads, connect to it later on-demand
     }
 
     status = QueueCreate(device,
