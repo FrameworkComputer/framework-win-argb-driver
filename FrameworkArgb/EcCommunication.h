@@ -1,9 +1,22 @@
-//Copyright (C) Framework Computer Inc
-//Copyright (C) 2014 The ChromiumOS Authors
-//
-//Abstract:
-//
-//    Definitions for accessing EC
+/*++
+
+Copyright (C) Framework Computer Inc, All Rights Reserved.
+Copyright (C) 2014 The ChromiumOS Authors
+
+Module Name:
+
+    EcCommunication.h
+
+Abstract:
+
+    This file contains definitions for accessing the EC via the crosecbus
+    KMDF driver.
+
+Environment:
+
+    User-mode Driver Framework 2
+
+--*/
 
 #pragma once
 
