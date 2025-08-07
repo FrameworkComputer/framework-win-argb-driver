@@ -24,7 +24,7 @@ if '%errorlevel%' NEQ '0' (
 :--------------------------------------
 
 echo **Installing Framework ARGB driver...
-sudo "%~dp0\devcon" install "%~dp0\FrameworkArgb.inf" root\FrameworkArgb
+"%~dp0\devcon" install "%~dp0\FrameworkArgb.inf" root\FrameworkArgb
 
 echo Done
 if not defined install_all cmd /k
