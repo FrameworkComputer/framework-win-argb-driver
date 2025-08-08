@@ -32,6 +32,7 @@
     <ClInclude Include="Device.h" />
     <ClInclude Include="Driver.h" />
     <ClInclude Include="EcCommunication.h" />
+    <ClInclude Include="ec_commands.h" />
     <ClInclude Include="LampArrayStructs.h" />
     <ClInclude Include="LampArray.h" />
     <ClInclude Include="Public.h" />

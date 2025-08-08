@@ -3,7 +3,6 @@
 SPDX-License-Identifier: MS-PL
 
 Copyright (C) Framework Computer Inc, All Rights Reserved.
-Copyright (C) 2014 The ChromiumOS Authors
 
 Module Name:
 
@@ -31,24 +30,7 @@ extern "C" {
 #include <wdf.h>
 #include "trace.h"
 
-/* Command version mask */
-#define EC_VER_MASK(version) (1UL << (version))
-
-#define EC_MEMMAP_ALS 0x80 /* ALS readings in lux (2 X 16 bits) */
-/* Unused 0x84 - 0x8f */
-#define EC_MEMMAP_ACC_STATUS 0x90 /* Accelerometer status (8 bits )*/
-/* Unused 0x91 */
-#define EC_MEMMAP_ACC_DATA 0x92 /* Accelerometers data 0x92 - 0x9f */
-/* 0x92: Lid Angle if available, LID_ANGLE_UNRELIABLE otherwise */
-/* 0x94 - 0x99: 1st Accelerometer */
-/* 0x9a - 0x9f: 2nd Accelerometer */
-
-/* Define the format of the accelerometer mapped memory status byte. */
-#define EC_MEMMAP_ACC_STATUS_SAMPLE_ID_MASK 0x0f
-// BIT(4)
-#define EC_MEMMAP_ACC_STATUS_BUSY_BIT (1 << 4)
-// BIT(7)
-#define EC_MEMMAP_ACC_STATUS_PRESENCE_BIT (1 << 7)
+#include "ec_commands.h"
 
 #define FILE_DEVICE_CROS_EMBEDDED_CONTROLLER 0x80EC
 
@@ -63,9 +45,6 @@ extern "C" {
 NTSTATUS ConnectToEc(
 	_Inout_ HANDLE* Handle
 );
-
-#define EC_CMD_RGBKBD_SET_COLOR 0x013A
-#define EC_CMD_RGBKBD           0x013B
 
 #define EC_RES_SUCCESS 0
 #define EC_INVALID_COMMAND 1
