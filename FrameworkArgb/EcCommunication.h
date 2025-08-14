@@ -30,7 +30,11 @@ extern "C" {
 #include <wdf.h>
 #include "trace.h"
 
+#include "ec_compat_win.h"
+#pragma pack(push, 1)
 #include "ec_commands.h"
+#pragma pack(pop)
+#pragma warning(pop) /* matches push in ec_compat_win.h */
 
 #define FILE_DEVICE_CROS_EMBEDDED_CONTROLLER 0x80EC
 
