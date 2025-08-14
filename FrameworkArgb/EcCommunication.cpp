@@ -21,7 +21,16 @@
 NTSTATUS ConnectToEc(
     _Inout_ HANDLE* Handle
 ) {
-    NTSTATUS Status = STATUS_SUCCESS;
+    if (Handle == NULL) {
+        TraceError("%!FUNC! Handle pointer is NULL");
+        return STATUS_INVALID_PARAMETER;
+    }
+
+    if (*Handle != INVALID_HANDLE_VALUE) {
+        // Already connected
+        TraceError("%!FUNC! Already connected");
+        return STATUS_SUCCESS;
+    }
 
     *Handle = CreateFileW(
         LR"(\\.\GLOBALROOT\Device\CrosEC)",
@@ -33,12 +42,14 @@ NTSTATUS ConnectToEc(
         NULL);
 
     if (*Handle == INVALID_HANDLE_VALUE) {
-        TraceError("%!FUNC! CreateFileW failed %!STATUS!", Status);
+        TraceError("%!FUNC! CreateFileW failed");
         return STATUS_INVALID_HANDLE;
     }
 
-    return Status;
+    TraceInformation("%!FUNC! Got Handle");
+    return STATUS_SUCCESS;
 }
+
 
 int CrosEcSendCommand(
     HANDLE Handle,
@@ -54,7 +65,7 @@ int CrosEcSendCommand(
     DWORD retb{};
     CROSEC_COMMAND cmd{};
 
-    if (Handle == NULL || Handle == INVALID_HANDLE_VALUE) {
+    if (Handle == INVALID_HANDLE_VALUE) {
         Status = STATUS_INVALID_HANDLE;
         TraceError("%!FUNC! Invalid Handle");
         return 0;
@@ -104,7 +115,7 @@ int CrosEcSendCommand(
             TraceError("%!FUNC! inlen is %d. But indata is NULL", inlen);
             return 0;
         }
-        RtlCopyMemory(cmd.data, indata, inlen);
+        RtlCopyMemory(indata, cmd.data, inlen);
     }
 
     return cmd.inlen;
@@ -117,7 +128,7 @@ int CrosEcReadMemU8(HANDLE Handle, unsigned int offset, UINT8* dest)
     DWORD retb{};
     CROSEC_READMEM rm{};
 
-    if (Handle == NULL || Handle == INVALID_HANDLE_VALUE) {
+    if (Handle == INVALID_HANDLE_VALUE) {
         Status = STATUS_INVALID_HANDLE;
         TraceError("%!FUNC! Invalid Handle");
         return 0;

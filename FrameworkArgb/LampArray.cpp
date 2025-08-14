@@ -19,9 +19,21 @@ Environment:
 #include "LampArray.h"
 #include "EcCommunication.h"
 
-void CrosEcSetColorRange(HANDLE Handle, UINT16 LampIdStart, UINT16 LampIdEnd, LampColor *Color)
+void CrosEcSetColorRange(
+    PDEVICE_CONTEXT DeviceContext,
+    UINT16 LampIdStart,
+    UINT16 LampIdEnd,
+    LampColor *Color)
 {
     EC_REQUEST_RGB_KBD_SET_COLOR cmd{};
+
+    // Connect on demand, if haven't connected yet
+    if (DeviceContext->CrosEcHandle == INVALID_HANDLE_VALUE) {
+        if (!NT_SUCCESS(ConnectToEc(&DeviceContext->CrosEcHandle))) {
+            return;
+        }
+    }
+
     cmd.StartKey = (UINT8)  LampIdStart;
     cmd.Length = (UINT8) (LampIdEnd - LampIdStart) + 1;
     for (UINT8 i = 0; i < cmd.Length; i++) {
@@ -38,7 +50,7 @@ void CrosEcSetColorRange(HANDLE Handle, UINT16 LampIdStart, UINT16 LampIdEnd, La
     }
 
     CrosEcSendCommand(
-        Handle,
+        DeviceContext->CrosEcHandle,
         EC_CMD_RGBKBD_SET_COLOR,
         0,
         &cmd,
@@ -48,9 +60,13 @@ void CrosEcSetColorRange(HANDLE Handle, UINT16 LampIdStart, UINT16 LampIdEnd, La
     );
 }
 
-void CrosEcSetColor(HANDLE Handle, UINT16 LampId, LampColor *Color)
+void CrosEcSetColor(
+    PDEVICE_CONTEXT DeviceContext,
+    UINT16 LampId,
+    LampColor *Color
+)
 {
-    CrosEcSetColorRange(Handle, LampId, LampId, Color);
+    CrosEcSetColorRange(DeviceContext, LampId, LampId, Color);
 }
 
 ULONG
@@ -143,7 +159,7 @@ void SetMultipleLamps(
 			report->colors[i].blue,
 			report->colors[i].intensity
 		);
-        CrosEcSetColor(DeviceContext->CrosEcHandle, report->lampIds[i], &report->colors[i]);
+        CrosEcSetColor(DeviceContext, report->lampIds[i], &report->colors[i]);
     }
 }
 
@@ -161,7 +177,7 @@ void SetLampRange(
         report->color.blue,
 		report->color.intensity
     );
-    CrosEcSetColorRange(DeviceContext->CrosEcHandle, report->lampIdStart, report->lampIdEnd, &report->color);
+    CrosEcSetColorRange(DeviceContext, report->lampIdStart, report->lampIdEnd, &report->color);
 }
 
 void SetAutonomousMode(
