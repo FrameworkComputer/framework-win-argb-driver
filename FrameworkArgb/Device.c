@@ -17,6 +17,8 @@ Environment:
 #include "driver.h"
 #include "EcCommunication.h"
 #include "device.tmh"
+#define _USE_MATH_DEFINES
+#include <math.h>
 
 //
 // This is the default report descriptor for the virtual Hid device returned
@@ -201,6 +203,81 @@ HID_DESCRIPTOR              G_DefaultHidDescriptor = {
 };
 
 NTSTATUS
+CalculateLampPositions(
+    PDEVICE_CONTEXT DeviceContext,
+    UINT16 LampCount,
+    UINT8 LedArrangement
+)
+{
+    UINT8 Layers = 0;
+    double centerX = 40000.0;
+    double centerY = 40000.0;
+    double radius = 40000.0;
+
+    TraceInformation("%!FUNC! LampCount: %d, LedArrangement: %d", LampCount, LedArrangement);
+
+    if (LampCount == 0) {
+        TraceError("LampCount is 0");
+        return STATUS_INVALID_PARAMETER;
+    }
+    if (LampCount > MAX_LAMPARRAY_LAMP_COUNT) {
+        TraceError("LampCount %d over %d", LampCount, MAX_LAMPARRAY_LAMP_COUNT);
+        return STATUS_INVALID_PARAMETER;
+    }
+
+    switch (LedArrangement) {
+    // Circular, layers of 8
+    case 0:
+        DeviceContext->Width = 80000;
+        DeviceContext->Height = 80000;
+        DeviceContext->Depth = 2000 * (LampCount / 8);
+        // Place LampCount LEDs evenly spaced around a circle of radius 40000 (centered at 40000,40000) in layers of 8
+        for (UINT8 i = 0; i < LampCount; i++) {
+            double angle = (2.0 * M_PI * (i % 8)) / 8;
+            DeviceContext->LampPositions[i].x = (UINT32)(centerX + radius * cos(angle));
+            DeviceContext->LampPositions[i].y = (UINT32)(centerY + radius * sin(angle));
+            DeviceContext->LampPositions[i].z = 2000 * i;
+        }
+        break;
+    // LEDs arranged in a circle single layer, even distance from each other
+    case 1:
+        DeviceContext->Width = 80000;
+        DeviceContext->Height = 80000;
+        // Place LampCount LEDs evenly spaced around a circle of radius 40000 (centered at 40000,40000)
+        for (UINT8 i = 0; i < LampCount; i++) {
+            double angle = (2.0 * M_PI * i) / LampCount;
+            DeviceContext->LampPositions[i].x = (UINT32)(centerX + radius * cos(angle));
+            DeviceContext->LampPositions[i].y = (UINT32)(centerY + radius * sin(angle));
+        }
+        break;
+    // Linear, LED strip with 5mm distance
+    case 2:
+        DeviceContext->Width = LampCount * 5000;
+        DeviceContext->Height = 0;
+        for (UINT8 i = 0; i <= LampCount; i++) {
+            DeviceContext->LampPositions[i].x = i * 5000;
+            DeviceContext->LampPositions[i].y = 0;
+        }
+        break;
+    // Square Matrix with 5mm distance
+    case 3:
+        Layers = (UINT8) sqrt((double) LampCount);
+        DeviceContext->Width = Layers * 5000;
+        DeviceContext->Height = Layers * 5000;
+        for (UINT8 i = 0; i <= LampCount; i++) {
+            DeviceContext->LampPositions[i].x = (i % Layers) * 5000;
+            DeviceContext->LampPositions[i].y = (i / Layers) * 5000;
+        }
+        break;
+    default:
+        TraceError("LedArrangement %d invalid.", LedArrangement);
+        return STATUS_INVALID_PARAMETER;
+    }
+
+    return STATUS_SUCCESS;
+}
+
+NTSTATUS
 FrameworkArgbCreateDevice(
     _Inout_ PWDFDEVICE_INIT DeviceInit
     )
@@ -227,6 +304,7 @@ Return Value:
     PHID_DEVICE_ATTRIBUTES  hidAttributes;
     WDFDEVICE               device;
     NTSTATUS                status;
+    UINT8                   LedArrangement;
 
     TraceInformation("%!FUNC! Entry");
 
@@ -261,28 +339,35 @@ Return Value:
     deviceContext->Device = device;
     deviceContext->CurrentLampId = 0;
     deviceContext->AutonomousMode = TRUE;
-    // 8 LEDs in a circle
-    // z is 0 for all LEDs, they're all in the same plane
-    // Bottom LED
-    deviceContext->LampPositions[0].x = 40000;
-    deviceContext->LampPositions[0].y = 0;
-    deviceContext->LampPositions[1].x = 60000;
-    deviceContext->LampPositions[1].y = 20000;
-    // Right LED
-    deviceContext->LampPositions[2].x = 80000;
-    deviceContext->LampPositions[2].y = 40000;
-    deviceContext->LampPositions[3].x = 60000;
-    deviceContext->LampPositions[3].y = 60000;
-    // Top LED
-    deviceContext->LampPositions[4].x = 40000;
-    deviceContext->LampPositions[4].y = 80000;
-    deviceContext->LampPositions[5].x = 20000;
-    deviceContext->LampPositions[5].y = 60000;
-    // Left LED
-    deviceContext->LampPositions[6].x = 0;
-    deviceContext->LampPositions[6].y = 40000;
-    deviceContext->LampPositions[7].x = 20000;
-    deviceContext->LampPositions[7].y = 20000;
+
+    deviceContext->LampCount = 0;
+    deviceContext->Width = 0;
+    deviceContext->Height = 0;
+    deviceContext->Depth = 2000;
+    LedArrangement = 0;
+    status = CheckRegistryForLedConfig(device);
+    if (NT_SUCCESS(status)) {
+        //
+        // We need to read read descriptor from registry
+        //
+        status = ReadLedConfigFromRegistry(device, &deviceContext->LampCount, &LedArrangement);
+        if (!NT_SUCCESS(status)) {
+            TraceError("Failed to read LED config from registry\n");
+        }
+    }
+
+    // Default 8 LED fan
+    if (deviceContext->LampCount == 0) {
+        TraceError("No lamps set, falling back to default");
+        deviceContext->LampCount = 8;
+        LedArrangement = 0;
+    }
+
+    status = CalculateLampPositions(deviceContext, deviceContext->LampCount, LedArrangement);
+    if (!NT_SUCCESS(status)) {
+        TraceError("Failed to calulcate lamp positions\n");
+        deviceContext->LampCount = 0;
+    }
 
     hidAttributes = &deviceContext->HidDeviceAttributes;
     RtlZeroMemory(hidAttributes, sizeof(HID_DEVICE_ATTRIBUTES));
@@ -524,5 +609,129 @@ Return Value:
     }
 
     status = RequestCopyFromBuffer(Request, string, stringSizeCb);
+    return status;
+}
+
+NTSTATUS
+CheckRegistryForLedConfig(
+    WDFDEVICE Device
+)
+/*++
+
+Routine Description:
+
+    Read "ReadFromRegistry" key value from device parameters in the registry.
+
+Arguments:
+
+    device - pointer to a device object.
+
+Return Value:
+
+    NT status code.
+
+--*/
+
+{
+    WDFKEY          hKey = NULL;
+    NTSTATUS        status;
+    UNICODE_STRING  valueName;
+    ULONG           value;
+
+    TraceInformation("%!FUNC! Entry");
+    //
+    // If this fails, AppVerifier shows an error
+    // RegOpenKeyExW: Key (\REGISTRY\MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\WUDF\Services\WUDFx02000) is denied &apos;READ_CONTROL KEY_QUERY_VALUE KEY_ENUMERATE_SUB_KEYS KEY_NOTIFY&apos; access with error 0x2
+    status = WdfDeviceOpenRegistryKey(Device,
+        PLUGPLAY_REGKEY_DEVICE,
+        KEY_READ,
+        WDF_NO_OBJECT_ATTRIBUTES,
+        &hKey);
+    if (NT_SUCCESS(status)) {
+       TraceInformation("%!FUNC! Found driver Registry key");
+        RtlInitUnicodeString(&valueName, L"ReadFromRegistry");
+
+        status = WdfRegistryQueryULong(hKey,
+            &valueName,
+            &value);
+
+        if (NT_SUCCESS(status)) {
+            TraceInformation("%!FUNC! ReadFromRegistry has value: %d", value);
+            if (value == 0) {
+                status = STATUS_UNSUCCESSFUL;
+            }
+        }
+
+        WdfRegistryClose(hKey);
+    }
+
+    TraceInformation("%!FUNC! Exiting with %!STATUS!", status);
+    return status;
+}
+
+NTSTATUS
+ReadLedConfigFromRegistry(
+    WDFDEVICE Device,
+    UINT16 *LampCount,
+    UINT8 *LedArrangement
+)
+/*++
+
+Routine Description:
+
+    Read LED config report descriptor from registry
+
+Arguments:
+
+    device - pointer to a device object.
+
+Return Value:
+
+    NT status code.
+
+--*/
+{
+    WDFKEY          hKey = NULL;
+    NTSTATUS        status;
+    UNICODE_STRING  valueName;
+    PDEVICE_CONTEXT deviceContext;
+    ULONG           value;
+
+    TraceInformation("%!FUNC! Entry");
+    deviceContext = GetDeviceContext(Device);
+
+    status = WdfDeviceOpenRegistryKey(Device,
+        PLUGPLAY_REGKEY_DEVICE,
+        KEY_READ,
+        WDF_NO_OBJECT_ATTRIBUTES,
+        &hKey);
+
+    if (!NT_SUCCESS(status)) {
+        TraceError("%!FUNC! Failed to find driver registry key");
+        return status;
+    }
+
+    RtlInitUnicodeString(&valueName, L"LedCount");
+    status = WdfRegistryQueryULong(hKey, &valueName, &value);
+    if (!NT_SUCCESS(status)) {
+        TraceError("%!FUNC! Failed to WdfRegistryQueryULong LedCount: %!STATUS!", status);
+        WdfRegistryClose(hKey);
+        return status;
+    }
+    TraceInformation("%!FUNC! LedCount has value: %d", value);
+    *LampCount = (UINT8) value;
+
+    RtlInitUnicodeString(&valueName, L"LedArrangement");
+    status = WdfRegistryQueryULong(hKey, &valueName, &value);
+    if (!NT_SUCCESS(status)) {
+        TraceError("%!FUNC! Failed to WdfRegistryQueryULong LedArrangement: %!STATUS!", status);
+        WdfRegistryClose(hKey);
+        return status;
+    }
+    TraceInformation("%!FUNC! LedArrangement has value: %d", value);
+    *LedArrangement = (UINT8) value;
+
+    WdfRegistryClose(hKey);
+
     return status;
 }

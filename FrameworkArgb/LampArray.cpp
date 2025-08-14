@@ -86,10 +86,10 @@ GetLampArrayAttributesReport(
 	DeviceContext = DeviceContext;
 
     LampArrayAttributesReport report = {
-        LAMPARRAY_LAMP_COUNT,
-        LAMPARRAY_WIDTH,
-        LAMPARRAY_HEIGHT,
-        LAMPARRAY_DEPTH,
+        DeviceContext->LampCount,
+        DeviceContext->Width,
+        DeviceContext->Height,
+        DeviceContext->Depth,
         LAMPARRAY_KIND,
         LAMPARRAY_UPDATE_INTERVAL
     };
@@ -128,7 +128,7 @@ GetLampAttributesResponseReport(
     };
 
     RtlCopyMemory(ReportBuffer, &report, sizeof(LampAttributesResponseReport));
-    DeviceContext->CurrentLampId = CurrentLampId + 1 >= LAMPARRAY_LAMP_COUNT ? CurrentLampId : CurrentLampId + 1;
+    DeviceContext->CurrentLampId = CurrentLampId + 1 >= DeviceContext->LampCount ? CurrentLampId : CurrentLampId + 1;
 
 	return Size;
 
