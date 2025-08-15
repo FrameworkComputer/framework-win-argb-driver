@@ -46,6 +46,8 @@ jobs:
           cp FrameworkArgb\x64\${{ matrix.configuration }}\FrameworkArgb\FrameworkArgb.dll bundle\
           cp FrameworkArgb\x64\${{ matrix.configuration }}\FrameworkArgb\FrameworkArgb.inf bundle\
           cp FrameworkArgb\x64\${{ matrix.configuration }}\FrameworkArgb.pdb bundle\
+          cp FrameworkArgb\x64\${{ matrix.configuration }}\Installer.exe bundle\
+          cp FrameworkArgb\x64\${{ matrix.configuration }}\Installer.pdb bundle\
 
       - name: Upload bundle
         uses: actions/upload-artifact@v4
