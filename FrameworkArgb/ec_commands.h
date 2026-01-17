@@ -8,7 +8,7 @@
 #ifndef __CROS_EC_EC_COMMANDS_H
 #define __CROS_EC_EC_COMMANDS_H
 
-#if !defined(__ACPI__) && !defined(__KERNEL__)
+#if !defined(__ACPI__) && !defined(__KERNEL__) && !defined(_MSC_VER)
 #include <stdint.h>
 #endif
 
