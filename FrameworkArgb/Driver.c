@@ -145,6 +145,8 @@ FrameworkArgbEvtDriverContextCleanup(
 Routine Description:
 
     Free all the resources allocated in DriverEntry.
+    Note: Device-specific cleanup (like EC handle) is done in
+    FrameworkArgbEvtDeviceCleanup, not here.
 
 Arguments:
 
@@ -156,18 +158,9 @@ Return Value:
 
 --*/
 {
-    PDEVICE_CONTEXT DeviceContext;
+    UNREFERENCED_PARAMETER(DriverObject);
 
     TraceInformation("%!FUNC! Entry");
-
-    DeviceContext = GetDeviceContext(DriverObject);
-    // Close handle to EC driver
-    if (DeviceContext && DeviceContext->CrosEcHandle && DeviceContext->CrosEcHandle != INVALID_HANDLE_VALUE) {
-        CloseHandle(DeviceContext->CrosEcHandle);
-        DeviceContext->CrosEcHandle = INVALID_HANDLE_VALUE;
-        TraceError("%!FUNC! Failed to close CrosEc Handle");
-    }
-    TraceInformation("%!FUNC! Closed CrosEc Handle");
 
     //
     // Stop WPP Tracing
@@ -177,4 +170,6 @@ Return Value:
 #else
     WPP_CLEANUP(WdfDriverWdmGetDriverObject((WDFDRIVER)DriverObject));
 #endif
+
+    TraceInformation("%!FUNC! Exit");
 }

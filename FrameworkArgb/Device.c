@@ -314,6 +314,7 @@ Return Value:
     WdfFdoInitSetFilter(DeviceInit);
 
     WDF_OBJECT_ATTRIBUTES_INIT_CONTEXT_TYPE(&deviceAttributes, DEVICE_CONTEXT);
+    deviceAttributes.EvtCleanupCallback = FrameworkArgbEvtDeviceCleanup;
 
     status = WdfDeviceCreate(&DeviceInit, &deviceAttributes, &device);
 
@@ -734,4 +735,40 @@ Return Value:
     WdfRegistryClose(hKey);
 
     return status;
+}
+
+VOID
+FrameworkArgbEvtDeviceCleanup(
+    _In_ WDFOBJECT DeviceObject
+)
+/*++
+Routine Description:
+
+    Free all the resources allocated for the device.
+    Called when the device is removed or disabled.
+
+Arguments:
+
+    DeviceObject - handle to a WDF Device object.
+
+Return Value:
+
+    VOID.
+
+--*/
+{
+    PDEVICE_CONTEXT DeviceContext;
+
+    TraceInformation("%!FUNC! Entry");
+
+    DeviceContext = GetDeviceContext(DeviceObject);
+
+    // Close handle to EC driver
+    if (DeviceContext && DeviceContext->CrosEcHandle && DeviceContext->CrosEcHandle != INVALID_HANDLE_VALUE) {
+        CloseHandle(DeviceContext->CrosEcHandle);
+        DeviceContext->CrosEcHandle = INVALID_HANDLE_VALUE;
+        TraceInformation("%!FUNC! Closed CrosEc Handle");
+    }
+
+    TraceInformation("%!FUNC! Exit");
 }
