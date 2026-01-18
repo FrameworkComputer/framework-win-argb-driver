@@ -45,6 +45,9 @@
     <ClInclude Include="EcCommunication.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ec_commands.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="LampArray.h">
       <Filter>Header Files</Filter>
     </ClInclude>
