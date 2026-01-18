@@ -32,6 +32,7 @@ typedef UCHAR HID_REPORT_DESCRIPTOR, * PHID_REPORT_DESCRIPTOR;
 DRIVER_INITIALIZE                   DriverEntry;
 EVT_WDF_DRIVER_DEVICE_ADD           EvtDeviceAdd;
 EVT_WDF_TIMER                       EvtTimerFunc;
+EVT_WDF_OBJECT_CONTEXT_CLEANUP      FrameworkArgbEvtDeviceCleanup;
 
 #define MAX_LAMPARRAY_LAMP_COUNT    256
 //#define LAMPARRAY_WIDTH             80000   // 80mm
