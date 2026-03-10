@@ -19,8 +19,6 @@ jobs:
 
       - name: Setup NuGet
         uses: NuGet/setup-nuget@v2
-        with:
-          version: '6.x'
 
       - name: Restore dependencies
         run: nuget restore FrameworkArgb\FrameworkArgb.sln
