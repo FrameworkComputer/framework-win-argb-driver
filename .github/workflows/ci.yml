@@ -65,6 +65,10 @@ jobs:
         uses: github/codeql-action/init@v4
         with:
           languages: cpp
+          # Pin CodeQL CLI version for WHCP Windows 11 25H2 certification
+          # See: https://learn.microsoft.com/en-us/windows-hardware/drivers/devtest/static-tools-and-codeql
+          tools: https://github.com/github/codeql-action/releases/download/codeql-bundle-v2.20.1/codeql-bundle-win64.tar.gz
+          config-file: .github/codeql/codeql-config.yml
 
       - name: Setup NuGet
         uses: NuGet/setup-nuget@v2
