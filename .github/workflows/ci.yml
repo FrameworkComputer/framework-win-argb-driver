@@ -52,3 +52,32 @@ jobs:
         with:
           name: framework_win_argb_${{ matrix.configuration }}
           path: bundle
+
+  codeql:
+    runs-on: windows-2022
+    permissions:
+      security-events: write
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v4
+        with:
+          languages: cpp
+
+      - name: Setup NuGet
+        uses: NuGet/setup-nuget@v2
+
+      - name: Restore dependencies
+        run: nuget restore FrameworkArgb\FrameworkArgb.sln
+
+      - name: Add MSBuild to PATH
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Build solution
+        run: |
+          msbuild FrameworkArgb\FrameworkArgb.sln /property:Configuration=Release /property:Platform=x64
+
+      - name: Perform CodeQL analysis
+        uses: github/codeql-action/analyze@v4
